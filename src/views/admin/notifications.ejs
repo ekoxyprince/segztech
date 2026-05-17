@@ -1,0 +1,204 @@
+<!-- Page Header -->
+<div class="page-header">
+  <div>
+    <h2>Notifications</h2>
+    <p class="text-muted">System notifications and alerts</p>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-outline" id="markAllReadBtn" <% if (unreadCount === 0) { %>disabled<% } %>>
+      <i class="fas fa-check-double"></i> Mark All Read
+    </button>
+  </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="stats-grid mb-4">
+  <div class="stat-card">
+    <div class="stat-icon bg-blue">
+      <i class="fas fa-bell"></i>
+    </div>
+    <div class="stat-content">
+      <span class="stat-value"><%= stats.total %></span>
+      <span class="stat-label">Total Notifications</span>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon bg-orange">
+      <i class="fas fa-eye-slash"></i>
+    </div>
+    <div class="stat-content">
+      <span class="stat-value"><%= stats.unread %></span>
+      <span class="stat-label">Unread</span>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon bg-green">
+      <i class="fas fa-shopping-bag"></i>
+    </div>
+    <div class="stat-content">
+      <span class="stat-value"><%= stats.orders %></span>
+      <span class="stat-label">Order Notifications</span>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon bg-purple">
+      <i class="fas fa-user-plus"></i>
+    </div>
+    <div class="stat-content">
+      <span class="stat-value"><%= stats.signups %></span>
+      <span class="stat-label">Signups</span>
+    </div>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="filters-bar">
+  <div class="filter-group">
+    <label>Type</label>
+    <select class="filter-select" id="typeFilter">
+      <option value="all" <% if (filter === 'all') { %>selected<% } %>>All Types</option>
+      <option value="order" <% if (filter === 'order') { %>selected<% } %>>Orders</option>
+      <option value="signup" <% if (filter === 'signup') { %>selected<% } %>>Signups</option>
+      <option value="message" <% if (filter === 'message') { %>selected<% } %>>Messages</option>
+    </select>
+  </div>
+  <div class="filter-divider"></div>
+  <div class="filter-results">
+    <strong><%= notifications ? notifications.length : 0 %></strong> notifications
+  </div>
+</div>
+
+<!-- Notifications List -->
+<div class="table-card">
+  <div class="notifications-list">
+    <% if (notifications && notifications.length > 0) { %>
+      <% notifications.forEach(notification => { %>
+        <div class="notification-item <% if (!notification.is_read) { %>unread<% } %>" data-id="<%= notification.id %>">
+          <div class="notification-icon">
+            <% if (notification.type === 'order') { %>
+              <i class="fas fa-shopping-bag"></i>
+            <% } else if (notification.type === 'signup') { %>
+              <i class="fas fa-user-plus"></i>
+            <% } else if (notification.type === 'message') { %>
+              <i class="fas fa-envelope"></i>
+            <% } else { %>
+              <i class="fas fa-bell"></i>
+            <% } %>
+          </div>
+          <div class="notification-content">
+            <div class="notification-header">
+              <h4 class="notification-title"><%= notification.title %></h4>
+              <span class="notification-time"><%= new Date(notification.created_at).toLocaleString() %></span>
+            </div>
+            <p class="notification-message"><%= notification.message %></p>
+            <% if (notification.data && notification.data.orderId) { %>
+              <a href="/admin/orders/<%= notification.data.orderId %>" class="notification-link">
+                <i class="fas fa-arrow-right"></i> View Order
+              </a>
+            <% } %>
+          </div>
+          <div class="notification-actions">
+            <% if (!notification.is_read) { %>
+              <button class="btn-icon mark-read-btn" data-id="<%= notification.id %>" title="Mark as read">
+                <i class="fas fa-check"></i>
+              </button>
+            <% } %>
+            <button class="btn-icon delete-notification-btn" data-id="<%= notification.id %>" title="Delete">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </div>
+      <% }) %>
+    <% } else { %>
+      <div class="empty-state">
+        <i class="fas fa-bell-slash"></i>
+        <p>No notifications yet</p>
+      </div>
+    <% } %>
+  </div>
+
+  <% if (pagination && pagination.totalPages > 1) { %>
+    <div class="pagination">
+      <% if (pagination.currentPage > 1) { %>
+        <a href="/admin/notifications?page=<%= pagination.currentPage - 1 %><% if (filter !== 'all') { %>&type=<%= filter %><% } %>" class="pagination-btn">
+          <i class="fas fa-chevron-left"></i>
+        </a>
+      <% } %>
+      <% for (var i = 1; i <= pagination.totalPages; i++) { %>
+        <% if (i === pagination.currentPage) { %>
+          <span class="pagination-btn active"><%= i %></span>
+        <% } else if (i === 1 || i === pagination.totalPages || Math.abs(i - pagination.currentPage) <= 2) { %>
+          <a href="/admin/notifications?page=<%= i %><% if (filter !== 'all') { %>&type=<%= filter %><% } %>" class="pagination-btn"><%= i %></a>
+        <% } else if (Math.abs(i - pagination.currentPage) === 3) { %>
+          <span class="pagination-btn">...</span>
+        <% } %>
+      <% } %>
+      <% if (pagination.currentPage < pagination.totalPages) { %>
+        <a href="/admin/notifications?page=<%= pagination.currentPage + 1 %><% if (filter !== 'all') { %>&type=<%= filter %><% } %>" class="pagination-btn">
+          <i class="fas fa-chevron-right"></i>
+        </a>
+      <% } %>
+    </div>
+  <% } %>
+</div>
+
+<script>
+$(document).ready(function() {
+  $('#typeFilter').on('change', function() {
+    var type = $(this).val();
+    window.location.href = '/admin/notifications?type=' + type;
+  });
+
+  $('#markAllReadBtn').on('click', function() {
+    var $btn = $(this);
+    $btn.prop('disabled', true);
+    $.post('/admin/notifications/read-all')
+      .done(function() {
+        window.location.reload();
+      })
+      .fail(function() {
+        $btn.prop('disabled', false);
+      });
+  });
+
+  $(document).on('click', '.mark-read-btn', function() {
+    var id = $(this).data('id');
+    var $item = $(this).closest('.notification-item');
+    $.post('/admin/notifications/' + id + '/read')
+      .done(function() {
+        $item.removeClass('unread');
+        $(this).closest('.notification-actions').find('.mark-read-btn').remove();
+        updateBadge();
+      }.bind(this));
+  });
+
+  $(document).on('click', '.delete-notification-btn', function() {
+    var id = $(this).data('id');
+    var $item = $(this).closest('.notification-item');
+    if (confirm('Delete this notification?')) {
+      $.ajax({
+        url: '/admin/notifications/' + id,
+        method: 'DELETE'
+      })
+      .done(function() {
+        $item.fadeOut(300, function() { $(this).remove(); });
+        updateBadge();
+      });
+    }
+  });
+
+  function updateBadge() {
+    fetch('/admin/api/notification-count')
+      .then(r => r.json())
+      .then(data => {
+        var nb = document.getElementById('notificationBadge');
+        if (nb && data.unreadNotifications > 0) {
+          nb.style.display = 'inline';
+          nb.textContent = data.unreadNotifications > 99 ? '99+' : data.unreadNotifications;
+        } else if (nb) {
+          nb.style.display = 'none';
+        }
+      });
+  }
+});
+</script>

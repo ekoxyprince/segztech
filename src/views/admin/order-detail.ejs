@@ -1,0 +1,346 @@
+<!-- Page Header -->
+<div class="page-header">
+  <div>
+    <h2>Order Details</h2>
+    <p class="text-muted">Order #<%= order.orderNumber %></p>
+  </div>
+  <div class="page-actions">
+    <a href="/admin/orders" class="btn btn-outline">
+      <i class="fas fa-arrow-left"></i> Back to Orders
+    </a>
+  </div>
+</div>
+
+<!-- Order Info Cards -->
+<div class="order-info-grid">
+  <div class="info-card">
+    <div class="info-header">
+      <i class="fas fa-shopping-bag"></i>
+      <h4>Order Status</h4>
+    </div>
+    <div class="info-content">
+      <span class="status-badge status-<%= order.status %>"><%= order.status %></span>
+      <form action="/admin/orders/<%= order.id %>/status" method="POST" class="status-form">
+        <select name="status" class="form-control">
+          <option value="pending" <%= order.status === 'pending' ? 'selected' : '' %>>Pending</option>
+          <option value="processing" <%= order.status === 'processing' ? 'selected' : '' %>>Processing</option>
+          <option value="shipped" <%= order.status === 'shipped' ? 'selected' : '' %>>Shipped</option>
+          <option value="delivered" <%= order.status === 'delivered' ? 'selected' : '' %>>Delivered</option>
+          <option value="cancelled" <%= order.status === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
+        </select>
+        <button type="submit" class="btn btn-primary btn-sm">Update Status</button>
+      </form>
+    </div>
+  </div>
+  
+  <div class="info-card">
+    <div class="info-header">
+      <i class="fas fa-credit-card"></i>
+      <h4>Payment Info</h4>
+    </div>
+    <div class="info-content">
+      <p><strong>Method:</strong> <%= order.paymentMethod %></p>
+      <p><strong>Status:</strong> <span class="payment-badge <%= order.paymentStatus %>"><%= order.paymentStatus %></span></p>
+      <p><strong>Total:</strong> <span class="total-amount">₦<%= order.total.toFixed(2) %></span></p>
+    </div>
+  </div>
+  
+  <div class="info-card">
+    <div class="info-header">
+      <i class="fas fa-shipping-fast"></i>
+      <h4>Shipping Info</h4>
+    </div>
+    <div class="info-content">
+      <p><strong>Address:</strong></p>
+      <p><%= order.shippingAddress.fullName %></p>
+      <p><%= order.shippingAddress.street %></p>
+      <p><%= order.shippingAddress.city %>, <%= order.shippingAddress.state %> <%= order.shippingAddress.zipCode %></p>
+      <% if (order.trackingNumber) { %>
+        <p><strong>Tracking:</strong> <%= order.trackingNumber %></p>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<!-- Order Items -->
+<div class="table-card">
+  <div class="card-header">
+    <h3><i class="fas fa-box"></i> Order Items</h3>
+  </div>
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Price</th>
+          <th>Quantity</th>
+          <th>Subtotal</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% order.items.forEach(item => { %>
+          <tr>
+            <td>
+              <div class="product-cell">
+                <img src="<%= item.image %>" alt="<%= item.name %>" class="product-thumb">
+                <div class="product-info">
+                  <span class="product-name"><%= item.name %></span>
+                </div>
+              </div>
+            </td>
+            <td>₦<%= item.price.toFixed(2) %></td>
+            <td><%= item.quantity %></td>
+            <td><strong>₦<%= item.subtotal.toFixed(2) %></strong></td>
+          </tr>
+        <% }) %>
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="3">Subtotal</td>
+          <td>₦<%= order.subtotal.toFixed(2) %></td>
+        </tr>
+        <tr>
+          <td colspan="3">Shipping</td>
+          <td><%= order.shippingLabel %></td>
+        </tr>
+        <tr>
+          <td colspan="3">Tax</td>
+          <td>₦<%= order.tax.toFixed(2) %></td>
+        </tr>
+        <tr class="total-row">
+          <td colspan="3">Total</td>
+          <td>₦<%= order.total.toFixed(2) %></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>
+
+<!-- Order Timeline -->
+<div class="timeline-card">
+  <div class="card-header">
+    <h3><i class="fas fa-history"></i> Order Timeline</h3>
+  </div>
+  <div class="timeline">
+    <% order.timeline.forEach((event, index) => { %>
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-content">
+          <span class="timeline-status"><%= event.status %></span>
+          <span class="timeline-note"><%= event.note %></span>
+          <span class="timeline-date"><%= new Date(event.date).toLocaleString() %></span>
+        </div>
+      </div>
+    <% }) %>
+  </div>
+</div>
+
+<style>
+.order-info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-bottom: 30px;
+}
+
+.info-card {
+  background: var(--bg-primary);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
+}
+
+.info-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.info-header i {
+  font-size: 20px;
+  color: var(--primary);
+}
+
+.info-header h4 {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.info-content p {
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.info-content strong {
+  color: var(--text-primary);
+}
+
+.status-form {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.status-form select {
+  flex: 1;
+  padding: 8px 12px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 14px;
+}
+
+.payment-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.payment-badge.paid {
+  background: rgba(0, 184, 148, 0.2);
+  color: var(--success);
+}
+
+.payment-badge.pending {
+  background: rgba(253, 203, 110, 0.2);
+  color: #d68910;
+}
+
+.total-amount {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.product-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.product-thumb {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: var(--radius);
+}
+
+.product-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.product-name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.data-table tfoot td {
+  border-top: 1px solid var(--border);
+  padding: 12px 20px;
+  color: var(--text-secondary);
+}
+
+.data-table .total-row td {
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--text-primary);
+  border-top: 2px solid var(--border);
+}
+
+.timeline-card {
+  background: var(--bg-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
+  margin-top: 30px;
+}
+
+.timeline-card .card-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.timeline-card .card-header h3 {
+  font-size: 16px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.timeline-card .card-header h3 i {
+  color: var(--primary);
+}
+
+.timeline {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.timeline-item {
+  display: flex;
+  gap: 16px;
+  position: relative;
+}
+
+.timeline-item:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  left: 7px;
+  top: 20px;
+  bottom: -20px;
+  width: 2px;
+  background: var(--border);
+}
+
+.timeline-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--primary);
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+.timeline-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.timeline-status {
+  font-weight: 600;
+  text-transform: capitalize;
+  color: var(--text-primary);
+}
+
+.timeline-note {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.timeline-date {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.text-muted {
+  color: var(--text-muted);
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+@media (max-width: 992px) {
+  .order-info-grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>

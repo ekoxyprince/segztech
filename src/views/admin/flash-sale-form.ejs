@@ -1,0 +1,136 @@
+<!-- Page Header -->
+<div class="page-header">
+  <div>
+    <h2><%= flashSale ? 'Edit Flash Sale' : 'New Flash Sale' %></h2>
+    <p class="text-muted"><%= flashSale ? 'Update flash sale schedule and details' : 'Create a scheduled flash sale period with start and end dates' %></p>
+  </div>
+</div>
+
+<div class="form-card">
+  <form action="<%= flashSale ? '/admin/flash-sales/' + flashSale.id : '/admin/flash-sales' %>" method="POST">
+    <div class="form-grid">
+      <div class="form-section">
+        <h3><i class="fas fa-info-circle"></i> Sale Details</h3>
+
+        <div class="form-group">
+          <label for="title">Title *</label>
+          <input type="text" class="form-control" id="title" name="title" value="<%= flashSale ? flashSale.title : '' %>" required placeholder="e.g., Mega Electronics Sale">
+        </div>
+
+        <div class="form-group">
+          <label for="subtitle">Subtitle</label>
+          <input type="text" class="form-control" id="subtitle" name="subtitle" value="<%= flashSale ? flashSale.subtitle : '' %>" placeholder="e.g., Up to 50% OFF on selected items">
+        </div>
+
+        <div class="form-group">
+          <label for="description">Description</label>
+          <textarea class="form-control" id="description" name="description" rows="3"><%= flashSale ? flashSale.description : '' %></textarea>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h3><i class="fas fa-calendar-alt"></i> Schedule</h3>
+
+        <div class="form-group">
+          <label for="start_date">Start Date & Time *</label>
+          <input type="datetime-local" class="form-control" id="start_date" name="start_date" value="<%= flashSale ? new Date(flashSale.start_date).toLocaleString('sv-SE', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }).replace(' ', 'T') : '' %>" required>
+        </div>
+
+        <div class="form-group">
+          <label for="end_date">End Date & Time *</label>
+          <input type="datetime-local" class="form-control" id="end_date" name="end_date" value="<%= flashSale ? new Date(flashSale.end_date).toLocaleString('sv-SE', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }).replace(' ', 'T') : '' %>" required>
+        </div>
+
+        <div class="form-group">
+          <label for="sort_order">Sort Order</label>
+          <input type="number" class="form-control" id="sort_order" name="sort_order" value="<%= flashSale ? flashSale.sort_order : 0 %>" min="0">
+        </div>
+
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" name="is_active" <%= !flashSale || flashSale.is_active ? 'checked' : '' %>>
+            <span>Active</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-section" style="grid-column: 1 / -1;">
+        <h3><i class="fas fa-image"></i> Display</h3>
+
+        <div class="form-group">
+          <label for="image">Banner Image URL</label>
+          <input type="url" class="form-control" id="image" name="image" value="<%= flashSale ? flashSale.image : '' %>" placeholder="https://example.com/banner.jpg">
+        </div>
+
+        <div class="form-group">
+          <label for="link">Link URL</label>
+          <input type="text" class="form-control" id="link" name="link" value="<%= flashSale ? flashSale.link : '' %>" placeholder="/products?sale=flash">
+          <small class="form-text text-muted">Where the banner should link to (e.g., /products?sale=flash)</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <a href="/admin/flash-sales" class="btn btn-outline">
+        <i class="fas fa-times"></i> Cancel
+      </a>
+      <button type="submit" class="btn btn-primary">
+        <i class="fas fa-save"></i> <%= flashSale ? 'Update Flash Sale' : 'Create Flash Sale' %>
+      </button>
+    </div>
+  </form>
+</div>
+
+<style>
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 30px;
+}
+
+.form-section {
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+}
+
+.form-section h3 {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-primary);
+}
+
+.form-section h3 i {
+  color: var(--primary);
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.text-muted {
+  color: var(--text-muted);
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+.form-text {
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+@media (max-width: 992px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>

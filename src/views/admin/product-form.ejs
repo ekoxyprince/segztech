@@ -1,0 +1,925 @@
+<!-- Page Header -->
+<div class="page-header">
+  <div>
+    <h2><%= product ? 'Edit Product' : 'Add New Product' %></h2>
+    <p class="text-muted"><%= product ? 'Update product details' : 'Create a new product listing with full specifications' %></p>
+  </div>
+</div>
+
+<!-- Product Form -->
+<div class="form-card">
+  <form action="<%= product ? '/admin/products/' + product.id : '/admin/products' %>" method="POST" id="productForm" enctype="multipart/form-data">
+    <div class="form-grid">
+      <!-- Basic Info -->
+      <div class="form-section">
+        <h3><i class="fas fa-info-circle"></i> Basic Information</h3>
+        
+        <div class="form-group">
+          <label for="name">Product Name *</label>
+          <input type="text" class="form-control" id="name" name="name" value="<%= product ? product.name : '' %>" required placeholder="e.g., HP EliteBook 840 G10 Core i7 16GB 512GB">
+        </div>
+        
+        <div class="form-group">
+          <label for="category">Category *</label>
+          <select class="form-control" id="category" name="category" required onchange="onCategoryChange()">
+            <option value="">-- Select Category --</option>
+            <% categories.forEach(cat => { %>
+              <option value="<%= cat.slug %>" data-hastypes="<%= hierarchy.getTypes(cat.slug).length > 0 ? 'true' : 'false' %>" <%= product && product.category_id === cat.slug ? 'selected' : '' %>><%= cat.name %></option>
+            <% }) %>
+          </select>
+        </div>
+        
+        <!-- Type/Subcategory Select (for categories like Laptops: Gaming, Business, etc.) -->
+        <div class="form-group" id="typeGroup" style="display: none;">
+          <label for="subcategory">Product Type *</label>
+          <select class="form-control" id="subcategory" name="subcategory" onchange="onTypeChange()">
+            <option value="">-- Select Type --</option>
+          </select>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="brand">Brand *</label>
+            <select class="form-control" id="brand" name="brand" required onchange="onBrandChange()" disabled>
+              <option value="">-- Select Brand --</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="model">Model Line *</label>
+            <select class="form-control" id="model" name="model" required onchange="onModelChange()" disabled>
+              <option value="">-- Select Model --</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="series">Specific Series/Variant *</label>
+          <select class="form-control" id="series" name="series" required onchange="onSeriesChange()" disabled>
+            <option value="">-- Select Series --</option>
+          </select>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="condition">Condition *</label>
+            <select class="form-control" id="condition" name="condition" required>
+              <option value="new" <%= product && product.condition === 'new' ? 'selected' : '' %>>New</option>
+              <option value="used_like_new" <%= product && product.condition === 'used_like_new' ? 'selected' : '' %>>Used - Like New</option>
+              <option value="used_good" <%= product && product.condition === 'used_good' ? 'selected' : '' %>>Used - Good</option>
+              <option value="used_fair" <%= product && product.condition === 'used_fair' ? 'selected' : '' %>>Used - Fair</option>
+              <option value="refurbished" <%= product && product.condition === 'refurbished' ? 'selected' : '' %>>Refurbished</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="sku">SKU</label>
+            <input type="text" class="form-control" id="sku" name="sku" value="<%= product ? product.sku : '' %>" placeholder="Auto-generated if empty">
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="shortDescription">Short Description</label>
+          <input type="text" class="form-control" id="shortDescription" name="shortDescription" value="<%= product ? product.short_description : '' %>" placeholder="Brief product summary (appears in listings)">
+        </div>
+        
+        <div class="form-group">
+          <label for="description">Full Description *</label>
+          <textarea class="form-control" id="description" name="description" rows="5" required><%= product ? product.description : '' %></textarea>
+        </div>
+      </div>
+      
+      <!-- Pricing & Stock -->
+      <div class="form-section">
+        <h3><i class="fas fa-dollar-sign"></i> Pricing & Stock</h3>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="price">Price (₦) *</label>
+            <input type="number" class="form-control" id="price" name="price" value="<%= product ? product.price : '' %>" step="0.01" min="0" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="originalPrice">Original Price (₦)</label>
+            <input type="number" class="form-control" id="originalPrice" name="originalPrice" value="<%= product ? product.original_price : '' %>" step="0.01" min="0">
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="stock">Stock Quantity *</label>
+          <input type="number" class="form-control" id="stock" name="stock" value="<%= product ? product.stock : '' %>" min="0" required>
+        </div>
+        
+        <div class="form-group">
+          <label>Product Tags</label>
+          <div class="checkbox-group">
+            <label class="checkbox-label">
+              <input type="checkbox" name="isFeatured" <%= product && product.is_featured ? 'checked' : '' %>>
+              <span>Featured Product</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" name="isFlashSale" <%= product && product.is_flash_sale ? 'checked' : '' %>>
+              <span>Flash Sale</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" name="isHotPick" <%= product && product.is_hot_pick ? 'checked' : '' %>>
+              <span>Hot Pick</span>
+            </label>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label>Notify Users</label>
+          <div class="checkbox-group">
+            <label class="checkbox-label">
+              <input type="checkbox" name="notifyUsers">
+              <span>Email existing users about new product</span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Images -->
+    <div class="form-section" style="margin-top: 20px;">
+      <h3><i class="fas fa-image"></i> Product Images & Video</h3>
+      
+      <div class="image-upload-area" id="imageUploadArea">
+        <input type="file" id="newImages" name="newImages" multiple accept="image/*" onchange="previewImages(event)">
+        <div class="upload-placeholder">
+          <i class="fas fa-cloud-upload-alt"></i>
+          <p>Drop images here or click to upload</p>
+          <small>PNG, JPG, WebP - Max 5MB each</small>
+        </div>
+        <div class="image-preview-grid" id="imagePreviewGrid"></div>
+      </div>
+      
+      <% if (product && product.images && product.images.length > 0) { %>
+        <div class="existing-images">
+          <label>Existing Images</label>
+          <div class="existing-images-grid">
+            <% product.images.forEach((img, idx) => { %>
+              <div class="existing-image-item">
+                <img src="<%= img.image_url || img %>" alt="Image <%= idx + 1 %>">
+                <button type="button" class="btn-delete-image" onclick="deleteExistingImage(<%= idx %>)" title="Delete Image">
+                  <i class="fas fa-times"></i>
+                </button>
+                <input type="hidden" name="existingImages" value="<%= img.image_url || img %>" id="existingImg<%= idx %>">
+              </div>
+            <% }) %>
+          </div>
+        </div>
+      <% } %>
+    </div>
+    
+    <!-- Dynamic Specifications -->
+    <div class="form-section" id="specsSection" style="display: none;">
+      <h3><i class="fas fa-microchip"></i> Technical Specifications</h3>
+      <p class="specs-info" id="specsInfo"></p>
+      <div id="dynamicSpecs" class="dynamic-specs-grid">
+        <!-- Loaded dynamically based on hierarchy selection -->
+      </div>
+    </div>
+    
+    <!-- Form Actions -->
+    <div class="form-actions">
+      <a href="/admin/products" class="btn btn-outline">
+        <i class="fas fa-times"></i> Cancel
+      </a>
+      <button type="submit" class="btn btn-primary" id="submitBtn" disabled>
+        <i class="fas fa-save"></i> <%= product ? 'Update Product' : 'Create Product' %>
+      </button>
+    </div>
+  </form>
+</div>
+
+<style>
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 30px;
+}
+
+.form-section {
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+}
+
+.form-section h3 {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-primary);
+}
+
+.form-section h3 i {
+  color: var(--primary);
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.checkbox-label input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary);
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.text-muted {
+  color: var(--text-muted);
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+.image-upload-area {
+  border: 2px dashed var(--border);
+  border-radius: var(--radius-lg);
+  padding: 30px;
+  text-align: center;
+  cursor: pointer;
+  transition: var(--transition);
+  position: relative;
+}
+
+.image-upload-area:hover {
+  border-color: var(--primary);
+  background: var(--bg-secondary);
+}
+
+.image-upload-area input[type="file"] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.upload-placeholder i {
+  font-size: 32px;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+
+.upload-placeholder p {
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.upload-placeholder small {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.image-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.preview-image-item {
+  position: relative;
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.preview-image-item img {
+  width: 100%;
+  height: 80px;
+  object-fit: cover;
+}
+
+.existing-images {
+  margin-top: 20px;
+}
+
+.existing-images-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.existing-image-item {
+  position: relative;
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.existing-image-item img {
+  width: 100%;
+  height: 80px;
+  object-fit: cover;
+}
+
+.dynamic-specs-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.specs-info {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: -10px;
+  margin-bottom: 20px;
+  padding: 8px 12px;
+  background: rgba(var(--primary-rgb, 255, 106, 0), 0.05);
+  border-radius: var(--radius);
+}
+
+#specsSection {
+  margin-top: 20px;
+}
+
+.cascade-progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  padding: 12px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius);
+  font-size: 13px;
+}
+
+.cascade-step {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: var(--border);
+  color: var(--text-muted);
+  transition: all 0.3s;
+}
+
+.cascade-step.active {
+  background: var(--primary);
+  color: white;
+}
+
+.cascade-step.completed {
+  background: #10b981;
+  color: white;
+}
+
+.cascade-arrow {
+  color: var(--text-muted);
+}
+
+.existing-image-item, .preview-image-item {
+  position: relative;
+  display: inline-block;
+}
+
+.btn-delete-image {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: rgba(239, 68, 68, 0.9);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  transition: all 0.2s;
+}
+
+.btn-delete-image:hover {
+  background: #dc2626;
+  transform: scale(1.1);
+}
+
+.existing-images-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.existing-image-item img {
+  width: 100%;
+  height: 100px;
+  object-fit: cover;
+  border-radius: var(--radius);
+}
+
+@media (max-width: 992px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .dynamic-specs-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .existing-images-grid,
+  .image-preview-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+</style>
+
+<script>
+const categorySpecs = <%- JSON.stringify(categorySpecs) %>;
+const selectedProduct = <%= product ? JSON.stringify(product) : 'null' %>;
+
+let currentCategory = '';
+let currentType = '';
+let currentBrand = '';
+let currentModel = '';
+let currentSeries = '';
+let specFields = [];
+
+async function onCategoryChange() {
+  const catSelect = document.getElementById('category');
+  currentCategory = catSelect.value;
+  currentType = '';
+  currentBrand = '';
+  currentModel = '';
+  currentSeries = '';
+  
+  resetDownstream();
+  
+  if (!currentCategory) {
+    document.getElementById('typeGroup').style.display = 'none';
+    document.getElementById('brand').disabled = true;
+    document.getElementById('specsSection').style.display = 'none';
+    updateSubmitState();
+    return;
+  }
+  
+  const hasTypes = catSelect.options[catSelect.selectedIndex].dataset.hastypes === 'true';
+  
+  if (hasTypes) {
+    await loadTypes();
+    document.getElementById('typeGroup').style.display = 'block';
+  } else {
+    document.getElementById('typeGroup').style.display = 'none';
+    await loadBrands();
+  }
+  
+  updateCascadeUI();
+  updateSubmitState();
+}
+
+async function loadTypes() {
+  try {
+    const res = await fetch(`/admin/api/hierarchy/types/${currentCategory}`);
+    const data = await res.json();
+    
+    const typeSelect = document.getElementById('subcategory');
+    typeSelect.innerHTML = '<option value="">-- Select Type --</option>';
+    
+    if (data.success && data.types) {
+      data.types.forEach(type => {
+        typeSelect.innerHTML += `<option value="${type}">${type}</option>`;
+      });
+    }
+  } catch (e) {
+    console.error('Failed to load types:', e);
+  }
+}
+
+async function onTypeChange() {
+  currentType = document.getElementById('subcategory').value;
+  currentBrand = '';
+  currentModel = '';
+  currentSeries = '';
+  
+  document.getElementById('brand').innerHTML = '<option value="">-- Select Brand --</option>';
+  document.getElementById('brand').disabled = true;
+  document.getElementById('model').innerHTML = '<option value="">-- Select Model --</option>';
+  document.getElementById('model').disabled = true;
+  document.getElementById('series').innerHTML = '<option value="">-- Select Series --</option>';
+  document.getElementById('series').disabled = true;
+  document.getElementById('specsSection').style.display = 'none';
+  
+  if (!currentType) {
+    updateSubmitState();
+    return;
+  }
+  
+  await loadBrands();
+  updateCascadeUI();
+  updateSubmitState();
+}
+
+async function loadBrands() {
+  try {
+    const params = currentType ? `?type=${encodeURIComponent(currentType)}` : '';
+    const res = await fetch(`/admin/api/hierarchy/brands/${currentCategory}${params}`);
+    const data = await res.json();
+    
+    const brandSelect = document.getElementById('brand');
+    brandSelect.innerHTML = '<option value="">-- Select Brand --</option>';
+    brandSelect.disabled = false;
+    
+    if (data.success && data.brands) {
+      data.brands.forEach(brand => {
+        const name = brand.name || brand;
+        brandSelect.innerHTML += `<option value="${name}">${name}</option>`;
+      });
+    }
+  } catch (e) {
+    console.error('Failed to load brands:', e);
+  }
+}
+
+async function onBrandChange() {
+  currentBrand = document.getElementById('brand').value;
+  currentModel = '';
+  currentSeries = '';
+  
+  document.getElementById('model').innerHTML = '<option value="">-- Select Model --</option>';
+  document.getElementById('model').disabled = true;
+  document.getElementById('series').innerHTML = '<option value="">-- Select Series --</option>';
+  document.getElementById('series').disabled = true;
+  document.getElementById('specsSection').style.display = 'none';
+  
+  if (!currentBrand) {
+    updateSubmitState();
+    return;
+  }
+  
+  await loadModels();
+  updateCascadeUI();
+  updateSubmitState();
+}
+
+async function loadModels() {
+  try {
+    const params = currentType ? `?type=${encodeURIComponent(currentType)}` : '';
+    const res = await fetch(`/admin/api/hierarchy/models/${currentCategory}/${encodeURIComponent(currentBrand)}${params}`);
+    const data = await res.json();
+    
+    const modelSelect = document.getElementById('model');
+    modelSelect.innerHTML = '<option value="">-- Select Model Line --</option>';
+    modelSelect.disabled = false;
+    
+    if (data.success && data.models) {
+      data.models.forEach(m => {
+        const label = m.type ? `${m.name} (${m.type})` : m.name;
+        modelSelect.innerHTML += `<option value="${m.name}">${label}</option>`;
+      });
+    }
+  } catch (e) {
+    console.error('Failed to load models:', e);
+  }
+}
+
+async function onModelChange() {
+  currentModel = document.getElementById('model').value;
+  currentSeries = '';
+  
+  document.getElementById('series').innerHTML = '<option value="">-- Select Specific Series --</option>';
+  document.getElementById('series').disabled = true;
+  document.getElementById('specsSection').style.display = 'none';
+  
+  if (!currentModel) {
+    updateSubmitState();
+    return;
+  }
+  
+  await loadSeries();
+  updateCascadeUI();
+  updateSubmitState();
+}
+
+async function loadSeries() {
+  try {
+    const res = await fetch(`/admin/api/hierarchy/series/${currentCategory}/${encodeURIComponent(currentBrand)}/${encodeURIComponent(currentModel)}`);
+    const data = await res.json();
+    
+    const seriesSelect = document.getElementById('series');
+    seriesSelect.innerHTML = '<option value="">-- Select Series/Variant --</option>';
+    seriesSelect.disabled = false;
+    
+    if (data.success && data.series) {
+      data.series.forEach(s => {
+        seriesSelect.innerHTML += `<option value="${s}">${s}</option>`;
+      });
+    }
+  } catch (e) {
+    console.error('Failed to load series:', e);
+  }
+}
+
+async function onSeriesChange() {
+  currentSeries = document.getElementById('series').value;
+  
+  if (!currentSeries) {
+    document.getElementById('specsSection').style.display = 'none';
+    updateSubmitState();
+    return;
+  }
+  
+  await loadSpecs();
+  updateCascadeUI();
+  updateSubmitState();
+}
+
+async function loadSpecs() {
+  const specData = categorySpecs.categories[currentCategory];
+  if (!specData) {
+    document.getElementById('specsSection').style.display = 'none';
+    return;
+  }
+  
+  document.getElementById('specsSection').style.display = 'block';
+  document.getElementById('specsInfo').textContent = `Adding specs for: ${currentCategory.toUpperCase()} → ${currentBrand} → ${currentModel} → ${currentSeries}`;
+  
+  const container = document.getElementById('dynamicSpecs');
+  container.innerHTML = '';
+  
+  const specs = specData.specs;
+  
+  specFields = [];
+  Object.entries(specs).forEach(([key, spec]) => {
+    if (key === 'brand' || key === 'model' || key === 'series') return;
+    
+    let inputHtml = '';
+    
+    if (spec.type === 'select') {
+      inputHtml = `<select class="form-control spec-field" data-key="${key}" name="specs[${key}]">
+        <option value="">Select ${spec.label}</option>
+        ${spec.options.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
+      </select>`;
+    } else if (spec.type === 'textarea') {
+      inputHtml = `<textarea class="form-control spec-field" data-key="${key}" name="specs[${key}]" rows="2" placeholder="${spec.placeholder || ''}"></textarea>`;
+    } else if (spec.type === 'checkbox') {
+      inputHtml = `<label class="checkbox-label">
+        <input type="checkbox" class="spec-field" data-key="${key}" name="specs[${key}]" value="yes">
+        <span>Yes</span>
+      </label>`;
+    } else {
+      inputHtml = `<input type="text" class="form-control spec-field" data-key="${key}" name="specs[${key}]" placeholder="${spec.placeholder || ''}">`;
+    }
+    
+    const required = spec.required ? '<span class="required-star">*</span>' : '';
+    
+    container.innerHTML += `
+      <div class="form-group spec-field-group" data-key="${key}">
+        <label for="spec_${key}">${spec.label} ${required}</label>
+        ${inputHtml}
+      </div>
+    `;
+    
+    specFields.push({ key, ...spec });
+  });
+  
+  if (currentCategory === 'laptops' && currentBrand && currentModel) {
+    try {
+      const res = await fetch(`/admin/api/hierarchy/defaults/${currentCategory}/${encodeURIComponent(currentBrand)}/${encodeURIComponent(currentModel)}`);
+      const data = await res.json();
+      if (data.success && data.defaults) {
+        Object.entries(data.defaults).forEach(([key, value]) => {
+          const field = document.querySelector(`.spec-field[data-key="${key}"]`);
+          if (field) {
+            if (field.type === 'checkbox') {
+              field.checked = true;
+            } else {
+              field.value = value;
+            }
+          }
+        });
+      }
+    } catch (e) {}
+  }
+  
+  if (selectedProduct && selectedProduct.specs) {
+    Object.entries(selectedProduct.specs).forEach(([key, value]) => {
+      const field = document.querySelector(`.spec-field[data-key="${key}"]`);
+      if (field) {
+        if (field.type === 'checkbox') {
+          field.checked = value === 'yes' || value === true;
+        } else {
+          field.value = value;
+        }
+      }
+    });
+  }
+}
+
+function resetDownstream() {
+  document.getElementById('brand').innerHTML = '<option value="">-- Select Brand --</option>';
+  document.getElementById('brand').disabled = true;
+  document.getElementById('model').innerHTML = '<option value="">-- Select Model --</option>';
+  document.getElementById('model').disabled = true;
+  document.getElementById('series').innerHTML = '<option value="">-- Select Series --</option>';
+  document.getElementById('series').disabled = true;
+  document.getElementById('specsSection').style.display = 'none';
+  document.getElementById('specsInfo').textContent = '';
+}
+
+function updateCascadeUI() {
+  const steps = [];
+  
+  steps.push({ label: 'Category', status: currentCategory ? 'completed' : 'active' });
+  
+  if (document.getElementById('typeGroup').style.display !== 'none') {
+    steps.push({ label: 'Type', status: currentType ? 'completed' : (currentCategory ? 'active' : '') });
+  }
+  
+  steps.push({ label: 'Brand', status: currentBrand ? 'completed' : (currentCategory ? 'active' : '') });
+  steps.push({ label: 'Model', status: currentModel ? 'completed' : (currentBrand ? 'active' : '') });
+  steps.push({ label: 'Series', status: currentSeries ? 'completed' : (currentModel ? 'active' : '') });
+  
+  let html = '<div class="cascade-progress">';
+  steps.forEach((step, i) => {
+    if (i > 0) html += '<span class="cascade-arrow">→</span>';
+    html += `<span class="cascade-step ${step.status}">${step.label}</span>`;
+  });
+  html += '</div>';
+  
+  const existing = document.querySelector('.cascade-progress');
+  if (existing) existing.replaceWith(document.createRange().createContextualFragment(html));
+  else document.querySelector('#specsSection')?.insertAdjacentHTML('beforebegin', html);
+}
+
+function updateSubmitState() {
+  const btn = document.getElementById('submitBtn');
+  const isValid = currentCategory && currentBrand && currentModel && currentSeries;
+  btn.disabled = !isValid;
+}
+
+function previewImages(event) {
+  const files = event.target.files;
+  const previewGrid = document.getElementById('imagePreviewGrid');
+  previewGrid.innerHTML = '';
+  
+  Array.from(files).forEach((file, index) => {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const div = document.createElement('div');
+      div.className = 'preview-image-item';
+      div.innerHTML = `
+        <img src="${e.target.result}" alt="Preview ${index + 1}">
+        <button type="button" class="btn-delete-image" onclick="this.parentElement.remove()">
+          <i class="fas fa-times"></i>
+        </button>
+      `;
+      previewGrid.appendChild(div);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  if (selectedProduct) {
+    const catSelect = document.getElementById('category');
+    if (selectedProduct.category_id) {
+      catSelect.value = selectedProduct.category_id;
+      currentCategory = selectedProduct.category_id;
+      
+      const hasTypes = catSelect.options[catSelect.selectedIndex].dataset.hastypes === 'true';
+      
+      if (hasTypes && selectedProduct.subcategory) {
+        document.getElementById('typeGroup').style.display = 'block';
+        loadTypes().then(() => {
+          document.getElementById('subcategory').value = selectedProduct.subcategory;
+          currentType = selectedProduct.subcategory;
+          
+          loadBrands().then(() => {
+            if (selectedProduct.brand) {
+              document.getElementById('brand').value = selectedProduct.brand;
+              currentBrand = selectedProduct.brand;
+              
+              loadModels().then(() => {
+                if (selectedProduct.model) {
+                  document.getElementById('model').value = selectedProduct.model;
+                  currentModel = selectedProduct.model;
+                  
+                  loadSeries().then(() => {
+                    if (selectedProduct.series) {
+                      document.getElementById('series').value = selectedProduct.series;
+                      currentSeries = selectedProduct.series;
+                      loadSpecs();
+                    }
+                    updateCascadeUI();
+                    updateSubmitState();
+                  });
+                }
+              });
+            }
+          });
+        });
+      } else {
+        loadBrands().then(() => {
+          if (selectedProduct.brand) {
+            document.getElementById('brand').value = selectedProduct.brand;
+            currentBrand = selectedProduct.brand;
+            
+            loadModels().then(() => {
+              if (selectedProduct.model) {
+                document.getElementById('model').value = selectedProduct.model;
+                currentModel = selectedProduct.model;
+                
+                loadSeries().then(() => {
+                  if (selectedProduct.series) {
+                    document.getElementById('series').value = selectedProduct.series;
+                    currentSeries = selectedProduct.series;
+                    loadSpecs();
+                  }
+                  updateCascadeUI();
+                  updateSubmitState();
+                });
+              }
+            });
+          }
+        });
+      }
+    }
+  }
+  
+  const form = document.getElementById('productForm');
+  form.addEventListener('submit', function(e) {
+    const specs = {};
+    document.querySelectorAll('.spec-field').forEach(field => {
+      const key = field.dataset.key;
+      if (field.type === 'checkbox') {
+        specs[key] = field.checked ? 'yes' : 'no';
+      } else {
+        if (field.value.trim()) {
+          specs[key] = field.value.trim();
+        }
+      }
+    });
+    
+    const hiddenInput = document.createElement('input');
+    hiddenInput.type = 'hidden';
+    hiddenInput.name = 'specs';
+    hiddenInput.value = JSON.stringify(specs);
+    form.appendChild(hiddenInput);
+    
+    const existingImages = [];
+    document.querySelectorAll('input[name="existingImages"]').forEach(input => {
+      if (input.value && !input.value.startsWith('data:') && input.value.trim()) {
+        existingImages.push(input.value);
+      }
+    });
+    
+    if (existingImages.length > 0) {
+      const existingHidden = document.createElement('input');
+      existingHidden.type = 'hidden';
+      existingHidden.name = 'existingImages';
+      existingHidden.value = JSON.stringify(existingImages);
+      form.appendChild(existingHidden);
+    }
+  });
+  });
+  
+  function deleteExistingImage(idx) {
+    const imgDiv = document.querySelectorAll('.existing-image-item')[idx];
+    if (imgDiv) {
+      imgDiv.remove();
+    }
+    // Remove from form submission
+    const input = document.getElementById('existingImg' + idx);
+    if (input) {
+      input.value = '';
+      input.disabled = true;
+    }
+  }
+</script>

@@ -1,0 +1,488 @@
+<%- include('../partials/header') %>
+
+<main class="main-content">
+  <!-- Breadcrumb -->
+  <section class="breadcrumb-section">
+    <div class="container">
+      <nav class="breadcrumb">
+        <a href="/">Home</a>
+        <span>/</span>
+        <a href="/products"><%= product.category_id ? 'Products' : 'Products' %></a>
+        <span>/</span>
+        <span><%= product.name %></span>
+      </nav>
+    </div>
+  </section>
+  
+  <!-- Product Detail -->
+  <section class="product-detail">
+    <div class="container">
+      <div class="product-detail-grid">
+        <!-- Product Gallery -->
+        <div class="product-gallery">
+          <div class="gallery-main">
+            <div class="gallery-images" id="galleryImages">
+              <% if (product.images && product.images.length > 0) { %>
+                <% product.images.forEach(function(image, index) { %>
+                  <div class="gallery-slide <%= index === 0 ? 'active' : '' %>">
+                    <img src="<%= image.image_url %>" alt="<%= product.name %>">
+                  </div>
+                <% }) %>
+              <% } else { %>
+                <div class="gallery-slide active">
+                  <img src="/images/placeholder.jpg" alt="<%= product.name %>">
+                </div>
+              <% } %>
+              <% if (product.videos && product.videos.length > 0) { %>
+                <% product.videos.forEach(function(video, index) { %>
+                  <div class="gallery-slide video-slide" data-video="<%= video.video_url %>">
+                    <div class="video-placeholder" onclick="playVideo(this, '<%= video.video_url %>')">
+                      <img src="<%= product.images && product.images[0] ? product.images[0].image_url : '/images/placeholder.jpg' %>" alt="Video">
+                      <div class="play-button">
+                        <i class="fas fa-play"></i>
+                      </div>
+                    </div>
+                  </div>
+                <% }) %>
+              <% } %>
+            </div>
+            <div class="gallery-nav">
+              <button class="gallery-prev" onclick="prevSlide()"><i class="fas fa-chevron-left"></i></button>
+              <button class="gallery-next" onclick="nextSlide()"><i class="fas fa-chevron-right"></i></button>
+            </div>
+          </div>
+          <div class="gallery-thumbnails">
+            <% if (product.images) { %>
+              <% product.images.forEach(function(image, index) { %>
+                <div class="thumbnail <%= index === 0 ? 'active' : '' %>" onclick="goToSlide(<%= index %>)">
+                  <img src="<%= image.image_url %>" alt="<%= product.name %>">
+                </div>
+              <% }) %>
+            <% } %>
+            <% if (product.videos) { %>
+              <% product.videos.forEach(function(video, index) { %>
+                <div class="thumbnail video-thumbnail" onclick="goToSlide(<%= (product.images ? product.images.length : 0) + index %>)">
+                  <img src="<%= product.images && product.images[0] ? product.images[0].image_url : '/images/placeholder.jpg' %>" alt="Video">
+                  <i class="fas fa-play"></i>
+                </div>
+              <% }) %>
+            <% } %>
+          </div>
+        </div>
+        
+        <!-- Video Section (after images) -->
+        <% if (product.videos && product.videos.length > 0) { %>
+          <div class="video-section" style="margin-top: 20px;">
+            <h3><i class="fas fa-video"></i> Product Video</h3>
+            <% product.videos.forEach(function(video, index) { %>
+              <div class="video-container" style="margin-top: 10px;">
+                <video controls class="product-video" style="width: 100%; max-height: 400px;">
+                  <source src="<%= video.video_url || video %>" type="video/mp4">
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+            <% }) %>
+          </div>
+        <% } %>
+        
+        <!-- Product Info -->
+        <div class="product-info-detail">
+          <span class="product-brand-detail"><%= product.brand %></span>
+          <h1 class="product-title-detail"><%= product.name %></h1>
+          
+          <!-- Rating -->
+          <div class="product-rating-detail">
+            <div class="stars">
+              <% for (let i = 1; i <= 5; i++) { %>
+                <% if (i <= Math.floor(product.ratings)) { %>
+                  <i class="fas fa-star"></i>
+                <% } else if (i - 0.5 <= product.ratings) { %>
+                  <i class="fas fa-star-half-alt"></i>
+                <% } else { %>
+                  <i class="far fa-star"></i>
+                <% } %>
+              <% } %>
+            </div>
+            <span class="rating-value"><%= product.ratings.toFixed(1) %></span>
+            <span class="review-count">(<%= product.review_count || 0 %> Reviews)</span>
+            <span class="sold-count"><%= product.sold_count || 0 %> Sold</span>
+          </div>
+          
+          <!-- Price -->
+          <div class="product-price-detail">
+            <span class="current-price">₦<%= product.price.toFixed(2) %></span>
+            <% if (product.original_price > product.price) { %>
+              <span class="original-price">₦<%= product.original_price.toFixed(2) %></span>
+              <span class="discount-badge">-<%= Math.round((1 - product.price / product.original_price) * 100) %>% OFF</span>
+            <% } %>
+          </div>
+          
+          <!-- Short Description -->
+          <% if (product.short_description) { %>
+            <p class="product-short-desc"><%= product.short_description %></p>
+          <% } %>
+          
+          <!-- Tags -->
+          <% if (product.tags && product.tags.length > 0) { %>
+            <div class="product-tags">
+              <% product.tags.forEach(function(tag) { %>
+                <span class="tag"><%= tag %></span>
+              <% }) %>
+            </div>
+          <% } %>
+          
+          <!-- Stock Status -->
+          <div class="stock-status <%= product.stock > 0 ? 'in-stock' : 'out-of-stock' %>">
+            <% if (product.stock > 0) { %>
+              <i class="fas fa-check-circle"></i> In Stock (<%= product.stock %> available)
+            <% } else { %>
+              <i class="fas fa-times-circle"></i> Out of Stock
+            <% } %>
+          </div>
+          
+          <!-- Add to Cart Section -->
+          <div class="add-to-cart-section">
+            <div class="quantity-selector">
+              <button class="qty-btn" onclick="updateQuantity(-1)">-</button>
+              <input type="number" id="productQuantity" value="1" min="1" max="<%= product.stock %>">
+              <button class="qty-btn" onclick="updateQuantity(1)">+</button>
+            </div>
+            <button class="add-to-cart-btn-large" id="addToCartBtn" data-product-id="<%= product.id %>" <%= product.stock === 0 ? 'disabled' : '' %>>
+              <i class="fas fa-shopping-cart"></i>
+              <span>Add to Cart</span>
+            </button>
+            <button class="wishlist-btn-large <%= isInWishlist ? 'active' : '' %>" id="wishlistBtn" data-product-id="<%= product.id %>">
+              <i class="<%= isInWishlist ? 'fas' : 'far' %> fa-heart"></i>
+              <span><%= isInWishlist ? 'Saved' : 'Save' %></span>
+            </button>
+          </div>
+          
+          <!-- Buy Now -->
+          <div class="buy-now-section">
+            <button class="buy-now-btn" onclick="buyNow('<%= product.id %>')">
+              <i class="fas fa-bolt"></i> Buy Now
+              <span class="order-online-badge"><i class="fas fa-gift"></i> Free Gift!</span>
+            </button>
+          </div>
+          
+          <!-- WhatsApp Order Section -->
+          <div class="whatsapp-order-section">
+            <h4><i class="fab fa-whatsapp"></i> Order via WhatsApp</h4>
+            <p>Chat with us directly to place your order. Quick response guaranteed!</p>
+            <a href="#" class="whatsapp-order-btn" id="whatsappOrderBtn">
+              <i class="fab fa-whatsapp"></i>
+              <span>Chat to Order</span>
+            </a>
+            <p class="whatsapp-order-note">Ordering online? You'll receive a FREE gift with your purchase!</p>
+          </div>
+          
+          <!-- Delivery Info -->
+          <div class="delivery-info">
+            <div class="delivery-item">
+              <i class="fas fa-truck"></i>
+              <div>
+                <strong>Free Delivery</strong>
+                <span>Orders over ₦100,000</span>
+              </div>
+            </div>
+            <div class="delivery-item">
+              <i class="fas fa-undo"></i>
+              <div>
+                <strong>30-Day Returns</strong>
+                <span>Easy return policy</span>
+              </div>
+            </div>
+            <div class="delivery-item">
+              <i class="fas fa-shield-alt"></i>
+              <div>
+                <strong>Secure Payment</strong>
+                <span>100% secure checkout</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Tabs Section -->
+      <div class="tabs-section">
+        <div class="tab-buttons">
+          <button class="tab-btn active" data-tab="description">Description</button>
+          <button class="tab-btn" data-tab="specifications">Specifications</button>
+          <button class="tab-btn" data-tab="reviews">Reviews (<%= product.review_count || 0 %>)</button>
+        </div>
+        
+        <div class="tab-content">
+          <div class="tab-panel active" id="description">
+            <div class="description-content">
+              <%- product.description || 'No description available.' %>
+            </div>
+          </div>
+          
+          <div class="tab-panel" id="specifications">
+            <h3>Technical Specifications</h3>
+            <table class="specs-table">
+              <% if (product.specs && Object.keys(product.specs).length > 0) { %>
+                <% Object.entries(product.specs).forEach(function(entry) { %>
+                  <tr>
+                    <th><%= entry[0].charAt(0).toUpperCase() + entry[0].slice(1).replace(/([A-Z])/g, ' $1') %></th>
+                    <td><%= entry[1] %></td>
+                  </tr>
+                <% }) %>
+              <% } else { %>
+                <tr><td colspan="2">No specifications available.</td></tr>
+              <% } %>
+            </table>
+          </div>
+          
+          <div class="tab-panel" id="reviews">
+            <h3>Customer Reviews</h3>
+            <% if (reviews && reviews.length > 0) { %>
+              <div class="reviews-summary">
+                <div class="rating-big">
+                  <span class="rating-number"><%= product.ratings.toFixed(1) %></span>
+                  <div class="stars">
+                    <% for (let i = 1; i <= 5; i++) { %>
+                      <i class="<%= i <= Math.round(product.ratings) ? 'fas' : 'far' %> fa-star"></i>
+                    <% } %>
+                  </div>
+                  <span><%= product.review_count || 0 %> reviews</span>
+                </div>
+              </div>
+              <div class="reviews-list">
+                <% reviews.forEach(function(review) { %>
+                  <div class="review-item">
+                    <div class="review-header">
+                      <div class="reviewer-info">
+                        <img src="https://ui-avatars.com/api/?name=<%= encodeURIComponent(review.user ? (review.user.first_name + ' ' + review.user.last_name) : 'Customer') %>&background=random" alt="<%= review.user ? review.user.first_name + ' ' + review.user.last_name : 'Customer' %>">
+                        <div>
+                          <strong><%= review.user ? review.user.first_name + ' ' + review.user.last_name : 'Customer' %></strong>
+                          <% if (review.is_verified) { %><span class="verified-badge"><i class="fas fa-check-circle"></i> Verified</span><% } %>
+                          <span class="review-date"><%= new Date(review.created_at).toLocaleDateString() %></span>
+                        </div>
+                      </div>
+                      <div class="review-rating">
+                        <% for (let i = 1; i <= 5; i++) { %>
+                          <i class="<%= i <= review.rating ? 'fas' : 'far' %> fa-star"></i>
+                        <% } %>
+                      </div>
+                    </div>
+                    <% if (review.title) { %><p class="review-title"><%= review.title %></p><% } %>
+                    <p class="review-text"><%= review.comment %></p>
+                  </div>
+                <% }) %>
+              </div>
+            <% } else { %>
+              <div class="empty-reviews">
+                <i class="fas fa-star"></i>
+                <p>No reviews yet</p>
+                <span>Be the first to review this product</span>
+              </div>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Related Products -->
+  <% if (relatedProducts && relatedProducts.length > 0) { %>
+    <section class="products-section">
+      <div class="container">
+        <h2 class="section-title">Related Products</h2>
+        <div class="products-grid four-columns">
+          <% relatedProducts.forEach(function(relProduct) { %>
+            <%- include('../partials/product-card', { product: relProduct, isInWishlist: false }) %>
+          <% }) %>
+        </div>
+      </div>
+    </section>
+  <% } %>
+</main>
+
+<!-- Mobile Bottom Bar -->
+<div class="mobile-bottom-bar" id="mobileBottomBar">
+  <button class="mobile-add-to-cart" id="mobileAddToCart" <%= product.stock === 0 ? 'disabled' : '' %>>
+    <i class="fas fa-shopping-cart"></i>
+    <span>Add to Cart</span>
+  </button>
+  <button class="mobile-buy-now" onclick="buyNow('<%= product.id %>')">
+    <i class="fas fa-bolt"></i>
+    <span>Buy Now</span>
+  </button>
+</div>
+
+<style>
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+</style>
+
+<script>
+var currentSlide = 0;
+var totalSlides = <%= (product.images ? product.images.length : 0) + (product.videos ? product.videos.length : 0) || 1 %>;
+
+function goToSlide(index) {
+  var slides = document.querySelectorAll('.gallery-slide');
+  var thumbnails = document.querySelectorAll('.thumbnail');
+  
+  slides.forEach(function(slide, i) {
+    slide.classList.toggle('active', i === index);
+  });
+  
+  thumbnails.forEach(function(thumb, i) {
+    thumb.classList.toggle('active', i === index);
+  });
+  
+  currentSlide = index;
+}
+
+function prevSlide() {
+  goToSlide((currentSlide - 1 + totalSlides) % totalSlides);
+}
+
+function nextSlide() {
+  goToSlide((currentSlide + 1) % totalSlides);
+}
+
+function playVideo(element, videoUrl) {
+  var iframe = document.createElement('iframe');
+  iframe.src = videoUrl + '?autoplay=1';
+  iframe.allow = 'autoplay; encrypted-media';
+  iframe.allowFullscreen = true;
+  element.parentNode.replaceChild(iframe, element);
+}
+
+function updateQuantity(change) {
+  var input = document.getElementById('productQuantity');
+  var newValue = parseInt(input.value) + change;
+  var max = parseInt(input.max);
+  
+  if (newValue >= 1 && newValue <= max) {
+    input.value = newValue;
+  }
+}
+
+$(document).ready(function() {
+  // Tab switching
+  $('.tab-btn').on('click', function() {
+    var tabId = $(this).data('tab');
+    $('.tab-btn').removeClass('active');
+    $('.tab-panel').removeClass('active');
+    $(this).addClass('active');
+    $('#' + tabId).addClass('active');
+  });
+
+  // Track product view
+  if (window.SegzAnalytics) {
+    SegzAnalytics.trackProductView(
+      '<%= product.id %>',
+      '<%= product.name ? product.name.replace(/'/g, "\\'") : "Unknown" %>',
+      <%= product.price %>,
+      '<%= product.category_id || "unknown" %>',
+      '<%= product.brand || "unknown" %>'
+    );
+  }
+
+  // WhatsApp Order Handler
+  var whatsappNumber = '15551234567';
+  var wProductName = '<%= product.name %>';
+  var wProductPrice = '<%= product.price.toFixed(2) %>';
+  var wProductQuantity = document.getElementById('productQuantity') ? document.getElementById('productQuantity').value : 1;
+  var whatsappMessage = 'Hello! I am interested in:\n*' + wProductName + '*\n*Price:* ₦' + wProductPrice + '\n*Quantity:* ' + wProductQuantity + '\n\nPlease confirm availability and total.';
+  var whatsappUrl = 'https://wa.me/' + whatsappNumber + '?text=' + encodeURIComponent(whatsappMessage);
+
+  $('#whatsappOrderBtn').on('click', function(e) {
+    e.preventDefault();
+    window.open(whatsappUrl, '_blank');
+  });
+
+  // Add to Cart
+  $('#addToCartBtn').on('click', function() {
+    var quantity = parseInt(document.getElementById('productQuantity').value) || 1;
+    $.ajax({
+      url: '/api/cart/add',
+      method: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify({ productId: '<%= product.id %>', quantity: quantity }),
+      success: function(response) {
+        if (response.success) {
+          updateCartCount(response.cartCount);
+          showNotification('Product added to cart!', 'success');
+        } else {
+          showNotification(response.message || 'Failed to add to cart', 'error');
+        }
+      },
+      error: function() {
+        showNotification('An error occurred. Please try again.', 'error');
+      }
+    });
+  });
+
+  // Wishlist Toggle
+  $('#wishlistBtn').on('click', function() {
+    $.post('/api/wishlist/toggle', { productId: '<%= product.id %>' })
+      .done(function(data) {
+        if (data.success) {
+          $('#wishlistBtn').toggleClass('active');
+          showNotification(data.message, 'success');
+        }
+      });
+  });
+
+  // Mobile bottom bar visibility
+  $(window).scroll(function() {
+    if ($(this).scrollTop() > 300) {
+      $('#mobileBottomBar').addClass('visible');
+    } else {
+      $('#mobileBottomBar').removeClass('visible');
+    }
+  });
+});
+
+function buyNow(productId) {
+  var quantity = parseInt(document.getElementById('productQuantity').value) || 1;
+  $.ajax({
+    url: '/orders/order-now',
+    method: 'POST',
+    contentType: 'application/json',
+    data: JSON.stringify({
+      productId: productId,
+      quantity: quantity,
+      fullName: '<%= user ? (user.firstName + " " + user.lastName) : "" %>',
+      phone: '<%= user ? (user.phone || "") : "" %>',
+      street: '',
+      city: '',
+      state: '',
+      zipCode: ''
+    }),
+    success: function(response) {
+      if (response.success) {
+        updateCartCount(0);
+        window.location.href = response.whatsappUrl;
+      } else {
+        showNotification(response.message || 'Error placing order', 'error');
+      }
+    },
+    error: function() {
+      showNotification('Error placing order', 'error');
+    }
+  });
+}
+
+function updateCartCount(count) {
+  var cartCount = document.querySelector('.cart-count');
+  if (cartCount) {
+    cartCount.textContent = count;
+    cartCount.style.display = count > 0 ? 'flex' : 'none';
+  }
+}
+
+function showNotification(message, type) {
+  var notification = document.createElement('div');
+  notification.className = 'notification notification-' + type;
+  notification.innerHTML = '<i class="fas fa-' + (type === 'success' ? 'check-circle' : 'exclamation-circle') + '"></i><span>' + message + '</span>';
+  document.body.appendChild(notification);
+  setTimeout(function() { notification.remove(); }, 3000);
+}
+</script>
+
+<%- include('../partials/footer') %>

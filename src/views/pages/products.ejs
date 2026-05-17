@@ -1,0 +1,253 @@
+<%- include('../partials/header') %>
+
+<main class="main-content">
+  <!-- Page Header -->
+  <section class="page-header">
+    <div class="container">
+      <nav class="breadcrumb">
+        <a href="/">Home</a>
+        <span>/</span>
+        <% if (currentCategory) { %>
+          <a href="/products">Products</a>
+          <span>/</span>
+          <span><%= currentCategory.name %></span>
+        <% } else if (currentBrand) { %>
+          <a href="/products">Products</a>
+          <span>/</span>
+          <span><%= currentBrand.name %></span>
+        <% } else if (filters.search) { %>
+          <span>Search Results</span>
+        <% } else if (filters.sale === 'flash') { %>
+          <span>Flash Sale</span>
+        <% } else if (filters.sale === 'hot') { %>
+          <span>Hot Picks</span>
+        <% } else { %>
+          <span>All Products</span>
+        <% } %>
+      </nav>
+      <h1 class="page-title"><%= title.split(' - ')[0] %></h1>
+    </div>
+  </section>
+  
+  <!-- Products Content -->
+  <section class="products-page">
+    <div class="container">
+      <div class="products-layout">
+        <!-- Sidebar Filters (Desktop) -->
+        <aside class="filters-sidebar">
+          <div class="filters-header">
+            <h3><i class="fas fa-filter"></i> Filters</h3>
+            <a href="/products" class="clear-filters">Clear All</a>
+          </div>
+          
+          <!-- Categories Filter -->
+          <div class="filter-group">
+            <h4 class="filter-title">Categories</h4>
+            <div class="filter-options">
+              <% categories.forEach(cat => { %>
+                <label class="filter-option">
+                  <input type="radio" name="category" value="<%= cat.slug %>" 
+                    <%= filters.category === cat.slug ? 'checked' : '' %>
+                    onchange="window.location='/products?category=<%= cat.slug %>'">
+                  <span><%= cat.name %></span>
+                  <span class="option-count">(<%= cat.count %>)</span>
+                </label>
+              <% }) %>
+            </div>
+          </div>
+          
+          <!-- Brands Filter -->
+          <div class="filter-group">
+            <h4 class="filter-title">Brands</h4>
+            <div class="filter-options">
+              <% brands.slice(0, 8).forEach(brand => { %>
+                <label class="filter-option">
+                  <input type="radio" name="brand" value="<%= brand.slug %>"
+                    <%= filters.brand === brand.slug ? 'checked' : '' %>
+                    onchange="window.location='/products?brand=<%= brand.slug %>'">
+                  <span><%= brand.name %></span>
+                </label>
+              <% }) %>
+            </div>
+          </div>
+          
+          <!-- Price Range Filter -->
+          <div class="filter-group">
+            <h4 class="filter-title">Price Range</h4>
+            <form action="/products" method="GET" class="price-filter-form">
+              <div class="price-inputs">
+                <input type="number" name="minPrice" placeholder="Min" value="<%= filters.minPrice || '' %>">
+                <span>-</span>
+                <input type="number" name="maxPrice" placeholder="Max" value="<%= filters.maxPrice || '' %>">
+              </div>
+              <button type="submit" class="apply-price-btn">Apply</button>
+            </form>
+          </div>
+          
+          <!-- Sale Filter -->
+          <div class="filter-group">
+            <h4 class="filter-title">Special Offers</h4>
+            <div class="filter-options">
+              <label class="filter-option">
+                <input type="checkbox" name="flashSale" 
+                  <%= filters.sale === 'flash' ? 'checked' : '' %>
+                  onchange="window.location='/products?sale=flash'">
+                <span>Flash Sale</span>
+              </label>
+              <label class="filter-option">
+                <input type="checkbox" name="hotPick"
+                  <%= filters.sale === 'hot' ? 'checked' : '' %>
+                  onchange="window.location='/products?sale=hot'">
+                <span>Hot Picks</span>
+              </label>
+            </div>
+          </div>
+        </aside>
+        
+        <!-- Products Grid -->
+        <div class="products-main">
+          <!-- Products Header -->
+          <div class="products-header">
+            <div class="products-count">
+              Showing <strong><%= products.length %></strong> of <strong><%= pagination.totalProducts %></strong> products
+            </div>
+            <div class="products-actions">
+              <button class="filter-toggle-btn" id="filterToggleBtn">
+                <i class="fas fa-sliders-h"></i> Filters
+              </button>
+              <div class="products-sort">
+                <label>Sort by:</label>
+                <select onchange="window.location=this.value">
+                  <option value="/products" <%= !filters.sort ? 'selected' : '' %>>Default</option>
+                  <option value="/products?sort=price-low" <%= filters.sort === 'price-low' ? 'selected' : '' %>>Price: Low to High</option>
+                  <option value="/products?sort=price-high" <%= filters.sort === 'price-high' ? 'selected' : '' %>>Price: High to Low</option>
+                  <option value="/products?sort=rating" <%= filters.sort === 'rating' ? 'selected' : '' %>>Top Rated</option>
+                  <option value="/products?sort=newest" <%= filters.sort === 'newest' ? 'selected' : '' %>>Newest First</option>
+                  <option value="/products?sort=popular" <%= filters.sort === 'popular' ? 'selected' : '' %>>Most Popular</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Products Grid -->
+          <% if (products.length > 0) { %>
+            <div class="products-grid four-columns">
+              <% products.forEach(product => { %>
+                <%- include('../partials/product-card', { product, isInWishlist: false }) %>
+              <% }) %>
+            </div>
+            
+            <!-- Pagination -->
+            <% if (pagination.totalPages > 1) { %>
+              <div class="pagination">
+                <% if (pagination.hasPrevPage) { %>
+                  <a href="/products?page=<%= pagination.currentPage - 1 %>" class="page-link">
+                    <i class="fas fa-chevron-left"></i> Previous
+                  </a>
+                <% } %>
+                
+                <% for (let i = 1; i <= pagination.totalPages; i++) { %>
+                  <a href="/products?page=<%= i %>" class="page-link <%= i === pagination.currentPage ? 'active' : '' %>">
+                    <%= i %>
+                  </a>
+                <% } %>
+                
+                <% if (pagination.hasNextPage) { %>
+                  <a href="/products?page=<%= pagination.currentPage + 1 %>" class="page-link">
+                    Next <i class="fas fa-chevron-right"></i>
+                  </a>
+                <% } %>
+              </div>
+            <% } %>
+          <% } else { %>
+            <div class="no-products">
+              <i class="fas fa-box-open"></i>
+              <h3>No products found</h3>
+              <p>Try adjusting your filters or browse our categories</p>
+              <a href="/products" class="btn btn-primary">View All Products</a>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Mobile Filter Drawer -->
+  <div class="drawer-overlay" id="filterOverlay"></div>
+  <div class="drawer drawer-right" id="filterDrawer">
+    <div class="drawer-header">
+      <h3><i class="fas fa-sliders-h"></i> Filters</h3>
+      <button class="drawer-close" id="filterCloseBtn"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="drawer-body">
+      <!-- Categories Filter -->
+      <div class="filter-group">
+        <h4 class="filter-title">Categories</h4>
+        <div class="filter-options">
+          <% categories.forEach(cat => { %>
+            <label class="filter-option">
+              <input type="radio" name="category" value="<%= cat.slug %>" 
+                <%= filters.category === cat.slug ? 'checked' : '' %>
+                onchange="window.location='/products?category=<%= cat.slug %>'">
+              <span><%= cat.name %></span>
+              <span class="option-count">(<%= cat.count %>)</span>
+            </label>
+          <% }) %>
+        </div>
+      </div>
+      
+      <!-- Brands Filter -->
+      <div class="filter-group">
+        <h4 class="filter-title">Brands</h4>
+        <div class="filter-options">
+          <% brands.slice(0, 8).forEach(brand => { %>
+            <label class="filter-option">
+              <input type="radio" name="brand" value="<%= brand.slug %>"
+                <%= filters.brand === brand.slug ? 'checked' : '' %>
+                onchange="window.location='/products?brand=<%= brand.slug %>'">
+              <span><%= brand.name %></span>
+            </label>
+          <% }) %>
+        </div>
+      </div>
+      
+      <!-- Price Range Filter -->
+      <div class="filter-group">
+        <h4 class="filter-title">Price Range</h4>
+        <form action="/products" method="GET" class="price-filter-form">
+          <div class="price-inputs">
+            <input type="number" name="minPrice" placeholder="Min" value="<%= filters.minPrice || '' %>">
+            <span>-</span>
+            <input type="number" name="maxPrice" placeholder="Max" value="<%= filters.maxPrice || '' %>">
+          </div>
+          <button type="submit" class="apply-price-btn">Apply</button>
+        </form>
+      </div>
+      
+      <!-- Sale Filter -->
+      <div class="filter-group">
+        <h4 class="filter-title">Special Offers</h4>
+        <div class="filter-options">
+          <label class="filter-option">
+            <input type="checkbox" name="flashSale" 
+              <%= filters.sale === 'flash' ? 'checked' : '' %>
+              onchange="window.location='/products?sale=flash'">
+            <span>Flash Sale</span>
+          </label>
+          <label class="filter-option">
+            <input type="checkbox" name="hotPick"
+              <%= filters.sale === 'hot' ? 'checked' : '' %>
+              onchange="window.location='/products?sale=hot'">
+            <span>Hot Picks</span>
+          </label>
+        </div>
+      </div>
+    </div>
+    <div class="drawer-footer">
+      <a href="/products" class="btn btn-outline btn-block">Clear All</a>
+    </div>
+  </div>
+</main>
+
+<%- include('../partials/footer') %>
+

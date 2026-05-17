@@ -1,0 +1,90 @@
+<!-- Mobile Filters Partial -->
+<div class="filter-group">
+  <h4 class="filter-title">Search</h4>
+  <form action="/products/categories/<%= category %>" method="GET" class="search-filter-form">
+    <input type="text" name="search" value="<%= filters.search || '' %>" placeholder="Search..." class="filter-search-input">
+    <button type="submit" class="search-btn"><i class="fas fa-search"></i></button>
+  </form>
+</div>
+
+<div class="filter-group">
+  <h4 class="filter-title">Price Range</h4>
+  <div class="price-inputs">
+    <input type="number" name="minPrice" placeholder="Min" value="<%= filters.minPrice || '' %>">
+    <span>-</span>
+    <input type="number" name="maxPrice" placeholder="Max" value="<%= filters.maxPrice || '' %>">
+  </div>
+</div>
+
+<div class="filter-group">
+  <h4 class="filter-title">Brands</h4>
+  <div class="filter-options">
+    <% brands.forEach(b => { %>
+      <label class="filter-option">
+        <input type="radio" name="brand" value="<%= b.slug %>" 
+          <%= filters.brand === b.slug ? 'checked' : '' %>>
+        <span><%= b.name %></span>
+      </label>
+    <% }) %>
+  </div>
+</div>
+
+<% if (categoryConfig.filters.includes('ram')) { %>
+<div class="filter-group">
+  <h4 class="filter-title">RAM</h4>
+  <div class="filter-options">
+    <% ['4GB', '8GB', '16GB', '24GB', '32GB', '64GB'].forEach(ramOpt => { %>
+      <label class="filter-option">
+        <input type="checkbox" name="ram" value="<%= ramOpt %>"
+          <%= filters.ram === ramOpt ? 'checked' : '' %>>
+        <span><%= ramOpt %></span>
+      </label>
+    <% }) %>
+  </div>
+</div>
+<% } %>
+
+<% if (categoryConfig.filters.includes('storage')) { %>
+<div class="filter-group">
+  <h4 class="filter-title">Storage</h4>
+  <div class="filter-options">
+    <% ['128GB', '256GB', '512GB', '1TB', '2TB'].forEach(storageOpt => { %>
+      <label class="filter-option">
+        <input type="checkbox" name="storage" value="<%= storageOpt %>"
+          <%= filters.storage === storageOpt ? 'checked' : '' %>>
+        <span><%= storageOpt %></span>
+      </label>
+    <% }) %>
+  </div>
+</div>
+<% } %>
+
+<% if (categoryConfig.filters.includes('gpu')) { %>
+<div class="filter-group">
+  <h4 class="filter-title">GPU</h4>
+  <div class="filter-options">
+    <% ['RTX 4090', 'RTX 4080', 'RTX 4070', 'RTX 4060', 'GTX 1660', 'Integrated'].forEach(gpuOpt => { %>
+      <label class="filter-option">
+        <input type="checkbox" name="gpu" value="<%= gpuOpt %>"
+          <%= filters.gpu === gpuOpt ? 'checked' : '' %>>
+        <span><%= gpuOpt %></span>
+      </label>
+    <% }) %>
+  </div>
+</div>
+<% } %>
+
+<% if (categoryConfig.filters.includes('display_size')) { %>
+<div class="filter-group">
+  <h4 class="filter-title">Display Size</h4>
+  <div class="filter-options">
+    <% ['11"', '13"', '14"', '15.6"', '16"', '17"'].forEach(sizeOpt => { %>
+      <label class="filter-option">
+        <input type="checkbox" name="display_size" value="<%= sizeOpt %>"
+          <%= filters.display_size === sizeOpt ? 'checked' : '' %>>
+        <span><%= sizeOpt %></span>
+      </label>
+    <% }) %>
+  </div>
+</div>
+<% } %>

@@ -1,0 +1,412 @@
+<%- include('../partials/header') %>
+
+<main class="main-content">
+  <!-- Page Header -->
+  <section class="page-header">
+    <div class="container">
+      <nav class="breadcrumb">
+        <a href="/">Home</a>
+        <span>/</span>
+        <a href="/products">Products</a>
+        <span>/</span>
+        <span><%= currentCategory.name %></span>
+      </nav>
+      <h1 class="page-title"><%= currentCategory.name %></h1>
+      <p class="page-subtitle">Browse our selection of <%= currentCategory.name.toLowerCase() %> with advanced filters</p>
+    </div>
+  </section>
+  
+  <!-- Products Content -->
+  <section class="category-page">
+    <div class="container">
+      <div class="products-layout">
+        <!-- Sidebar Filters (Desktop) -->
+        <aside class="filters-sidebar">
+          <div class="filters-header">
+            <h3><i class="fas fa-filter"></i> Filters</h3>
+            <a href="/products/categories/<%= category %>" class="clear-filters">Clear All</a>
+          </div>
+          
+          <!-- Search -->
+          <div class="filter-group">
+            <h4 class="filter-title">Search</h4>
+            <form action="/products/categories/<%= category %>" method="GET" class="search-filter-form">
+              <input type="text" name="search" value="<%= filters.search || '' %>" placeholder="Search <%= currentCategory.name.toLowerCase() %>..." class="filter-search-input">
+              <% if (filters.brand) { %><input type="hidden" name="brand" value="<%= filters.brand %>"><% } %>
+              <% if (filters.condition) { %><input type="hidden" name="condition" value="<%= filters.condition %>"><% } %>
+              <% if (filters.minPrice) { %><input type="hidden" name="minPrice" value="<%= filters.minPrice %>"><% } %>
+              <% if (filters.maxPrice) { %><input type="hidden" name="maxPrice" value="<%= filters.maxPrice %>"><% } %>
+              <% if (filters.ram) { %><input type="hidden" name="ram" value="<%= filters.ram %>"><% } %>
+              <% if (filters.storage) { %><input type="hidden" name="storage" value="<%= filters.storage %>"><% } %>
+              <button type="submit" class="search-btn"><i class="fas fa-search"></i></button>
+            </form>
+          </div>
+          
+          <!-- Condition Filter -->
+          <div class="filter-group">
+            <h4 class="filter-title">Condition</h4>
+            <div class="filter-options">
+              <label class="filter-option">
+                <input type="radio" name="condition" value="" 
+                  <%= !filters.condition ? 'checked' : '' %>
+                  onchange="updateFilter('condition', '')">
+                <span>All Conditions</span>
+              </label>
+              <label class="filter-option">
+                <input type="radio" name="condition" value="new" 
+                  <%= filters.condition === 'new' ? 'checked' : '' %>
+                  onchange="updateFilter('condition', 'new')">
+                <span>New</span>
+              </label>
+              <label class="filter-option">
+                <input type="radio" name="condition" value="used_like_new" 
+                  <%= filters.condition === 'used_like_new' ? 'checked' : '' %>
+                  onchange="updateFilter('condition', 'used_like_new')">
+                <span>Used - Like New</span>
+              </label>
+              <label class="filter-option">
+                <input type="radio" name="condition" value="used_good" 
+                  <%= filters.condition === 'used_good' ? 'checked' : '' %>
+                  onchange="updateFilter('condition', 'used_good')">
+                <span>Used - Good</span>
+              </label>
+              <label class="filter-option">
+                <input type="radio" name="condition" value="refurbished" 
+                  <%= filters.condition === 'refurbished' ? 'checked' : '' %>
+                  onchange="updateFilter('condition', 'refurbished')">
+                <span>Refurbished</span>
+              </label>
+            </div>
+          </div>
+          
+          <!-- Price Range Filter -->
+          <div class="filter-group">
+            <h4 class="filter-title">Price Range</h4>
+            <form action="/products/categories/<%= category %>" method="GET" class="price-filter-form">
+              <div class="price-inputs">
+                <input type="number" name="minPrice" placeholder="Min" value="<%= filters.minPrice || '' %>">
+                <span>-</span>
+                <input type="number" name="maxPrice" placeholder="Max" value="<%= filters.maxPrice || '' %>">
+              </div>
+              <% if (filters.brand) { %><input type="hidden" name="brand" value="<%= filters.brand %>"><% } %>
+              <% if (filters.condition) { %><input type="hidden" name="condition" value="<%= filters.condition %>"><% } %>
+              <% if (filters.search) { %><input type="hidden" name="search" value="<%= filters.search %>"><% } %>
+              <% if (filters.ram) { %><input type="hidden" name="ram" value="<%= filters.ram %>"><% } %>
+              <% if (filters.storage) { %><input type="hidden" name="storage" value="<%= filters.storage %>"><% } %>
+              <button type="submit" class="apply-price-btn">Apply</button>
+            </form>
+          </div>
+          
+          <!-- Brand Filter -->
+          <div class="filter-group">
+            <h4 class="filter-title">Brands</h4>
+            <div class="filter-options">
+              <% brands.slice(0, 10).forEach(b => { %>
+                <label class="filter-option">
+                  <input type="radio" name="brand" value="<%= b.slug %>" 
+                    <%= filters.brand === b.slug ? 'checked' : '' %>
+                    onchange="updateFilter('brand', '<%= b.slug %>')">
+                  <span><%= b.name %></span>
+                </label>
+              <% }) %>
+            </div>
+          </div>
+          
+          <% if (categoryConfig.filters.includes('ram')) { %>
+          <!-- RAM Filter -->
+          <div class="filter-group">
+            <h4 class="filter-title">RAM</h4>
+            <div class="filter-options">
+              <% ['4GB', '8GB', '16GB', '24GB', '32GB', '64GB'].forEach(ramOpt => { %>
+                <label class="filter-option">
+                  <input type="checkbox" name="ram" value="<%= ramOpt %>"
+                    <%= filters.ram === ramOpt ? 'checked' : '' %>
+                    onchange="toggleFilter('ram', '<%= ramOpt %>')">
+                  <span><%= ramOpt %></span>
+                </label>
+              <% }) %>
+            </div>
+          </div>
+          <% } %>
+          
+          <% if (categoryConfig.filters.includes('storage')) { %>
+          <!-- Storage Filter -->
+          <div class="filter-group">
+            <h4 class="filter-title">Storage</h4>
+            <div class="filter-options">
+              <% ['128GB', '256GB', '512GB', '1TB', '2TB'].forEach(storageOpt => { %>
+                <label class="filter-option">
+                  <input type="checkbox" name="storage" value="<%= storageOpt %>"
+                    <%= filters.storage === storageOpt ? 'checked' : '' %>
+                    onchange="toggleFilter('storage', '<%= storageOpt %>')">
+                  <span><%= storageOpt %></span>
+                </label>
+              <% }) %>
+            </div>
+          </div>
+          <% } %>
+          
+          <% if (categoryConfig.filters.includes('gpu')) { %>
+          <!-- GPU Filter -->
+          <div class="filter-group">
+            <h4 class="filter-title">GPU</h4>
+            <div class="filter-options">
+              <% ['RTX 4090', 'RTX 4080', 'RTX 4070', 'RTX 4060', 'GTX 1660', 'Integrated'].forEach(gpuOpt => { %>
+                <label class="filter-option">
+                  <input type="checkbox" name="gpu" value="<%= gpuOpt %>"
+                    <%= filters.gpu === gpuOpt ? 'checked' : '' %>
+                    onchange="toggleFilter('gpu', '<%= gpuOpt %>')">
+                  <span><%= gpuOpt %></span>
+                </label>
+              <% }) %>
+            </div>
+          </div>
+          <% } %>
+          
+          <% if (categoryConfig.filters.includes('display_size')) { %>
+          <!-- Display Size Filter -->
+          <div class="filter-group">
+            <h4 class="filter-title">Display Size</h4>
+            <div class="filter-options">
+              <% ['11"', '13"', '14"', '15.6"', '16"', '17"'].forEach(sizeOpt => { %>
+                <label class="filter-option">
+                  <input type="checkbox" name="display_size" value="<%= sizeOpt %>"
+                    <%= filters.display_size === sizeOpt ? 'checked' : '' %>
+                    onchange="toggleFilter('display_size', '<%= sizeOpt %>')">
+                  <span><%= sizeOpt %></span>
+                </label>
+              <% }) %>
+            </div>
+          </div>
+          <% } %>
+          
+          <% if (categoryConfig.filters.includes('battery')) { %>
+          <!-- Battery Filter -->
+          <div class="filter-group">
+            <h4 class="filter-title">Battery Capacity</h4>
+            <div class="filter-options">
+              <% ['4000mAh+', '5000mAh+', '6000mAh+', '7000mAh+'].forEach(battOpt => { %>
+                <label class="filter-option">
+                  <input type="checkbox" name="battery" value="<%= battOpt %>"
+                    <%= filters.battery === battOpt ? 'checked' : '' %>
+                    onchange="toggleFilter('battery', '<%= battOpt %>')">
+                  <span><%= battOpt %></span>
+                </label>
+              <% }) %>
+            </div>
+          </div>
+          <% } %>
+          
+          <% if (categoryConfig.filters.includes('screen_size')) { %>
+          <!-- Screen Size Filter (Monitors) -->
+          <div class="filter-group">
+            <h4 class="filter-title">Screen Size</h4>
+            <div class="filter-options">
+              <% ['21.5"', '23.8"', '24"', '25"', '27"', '28"', '32"', '34"', '49"'].forEach(sizeOpt => { %>
+                <label class="filter-option">
+                  <input type="checkbox" name="screen_size" value="<%= sizeOpt %>"
+                    <%= filters.screen_size === sizeOpt ? 'checked' : '' %>
+                    onchange="toggleFilter('screen_size', '<%= sizeOpt %>')">
+                  <span><%= sizeOpt %></span>
+                </label>
+              <% }) %>
+            </div>
+          </div>
+          <% } %>
+          
+          <% if (categoryConfig.filters.includes('refresh_rate')) { %>
+          <!-- Refresh Rate Filter (Monitors) -->
+          <div class="filter-group">
+            <h4 class="filter-title">Refresh Rate</h4>
+            <div class="filter-options">
+              <% ['60Hz', '75Hz', '100Hz', '120Hz', '144Hz', '165Hz', '180Hz', '240Hz', '360Hz'].forEach(rateOpt => { %>
+                <label class="filter-option">
+                  <input type="checkbox" name="refresh_rate" value="<%= rateOpt %>"
+                    <%= filters.refresh_rate === rateOpt ? 'checked' : '' %>
+                    onchange="toggleFilter('refresh_rate', '<%= rateOpt %>')">
+                  <span><%= rateOpt %></span>
+                </label>
+              <% }) %>
+            </div>
+          </div>
+          <% } %>
+          
+          <% if (categoryConfig.filters.includes('resolution')) { %>
+          <!-- Resolution Filter (Monitors) -->
+          <div class="filter-group">
+            <h4 class="filter-title">Resolution</h4>
+            <div class="filter-options">
+              <% ['1920x1080 (FHD)', '2560x1080 (UWFHD)', '2560x1440 (QHD)', '3440x1440 (UWQHD)', '3840x2160 (4K UHD)', '5120x1440 (DQHD)'].forEach(resOpt => { %>
+                <label class="filter-option">
+                  <input type="checkbox" name="resolution" value="<%= resOpt %>"
+                    <%= filters.resolution === resOpt ? 'checked' : '' %>
+                    onchange="toggleFilter('resolution', '<%= resOpt %>')">
+                  <span><%= resOpt %></span>
+                </label>
+              <% }) %>
+            </div>
+          </div>
+          <% } %>
+          
+          <% if (categoryConfig.filters.includes('panel_type')) { %>
+          <!-- Panel Type Filter (Monitors) -->
+          <div class="filter-group">
+            <h4 class="filter-title">Panel Type</h4>
+            <div class="filter-options">
+              <% ['IPS', 'VA', 'TN', 'OLED', 'Mini-LED'].forEach(panelOpt => { %>
+                <label class="filter-option">
+                  <input type="checkbox" name="panel_type" value="<%= panelOpt %>"
+                    <%= filters.panel_type === panelOpt ? 'checked' : '' %>
+                    onchange="toggleFilter('panel_type', '<%= panelOpt %>')">
+                  <span><%= panelOpt %></span>
+                </label>
+              <% }) %>
+            </div>
+          </div>
+          <% } %>
+        </aside>
+        
+        <!-- Products Grid -->
+        <div class="products-main">
+          <!-- Active Filters -->
+          <% if (Object.keys(activeFilters).length > 0) { %>
+            <div class="active-filters">
+              <span class="active-filters-label">Active filters:</span>
+              <% Object.entries(activeFilters).forEach(([key, value]) => { %>
+                <a href="/products/categories/<%= category %>?<%= Object.entries({...filters, [key]: null}).filter(([k,v]) => v).map(([k,v]) => k + '=' + v).join('&') %>" class="active-filter-tag">
+                  <%= value %> <i class="fas fa-times"></i>
+                </a>
+              <% }) %>
+            </div>
+          <% } %>
+          
+          <!-- Products Header -->
+          <div class="products-header">
+            <div class="products-count">
+              Showing <strong><%= products.length %></strong> of <strong><%= pagination.totalProducts %></strong> <%= currentCategory.name.toLowerCase() %>
+            </div>
+            <div class="products-actions">
+              <button class="filter-toggle-btn" id="filterToggleBtn">
+                <i class="fas fa-sliders-h"></i> Filters
+              </button>
+              <div class="products-sort">
+                <label>Sort by:</label>
+                <select onchange="window.location=this.value">
+                  <option value="/products/categories/<%= category %>?sort=popular<%= filters.brand ? '&brand=' + filters.brand : '' %>" <%= filters.sort === 'popular' ? 'selected' : '' %>>Most Popular</option>
+                  <option value="/products/categories/<%= category %>?sort=newest<%= filters.brand ? '&brand=' + filters.brand : '' %>" <%= filters.sort === 'newest' ? 'selected' : '' %>>Newest First</option>
+                  <option value="/products/categories/<%= category %>?sort=price-low<%= filters.brand ? '&brand=' + filters.brand : '' %>" <%= filters.sort === 'price-low' ? 'selected' : '' %>>Price: Low to High</option>
+                  <option value="/products/categories/<%= category %>?sort=price-high<%= filters.brand ? '&brand=' + filters.brand : '' %>" <%= filters.sort === 'price-high' ? 'selected' : '' %>>Price: High to Low</option>
+                  <option value="/products/categories/<%= category %>?sort=rating<%= filters.brand ? '&brand=' + filters.brand : '' %>" <%= filters.sort === 'rating' ? 'selected' : '' %>>Top Rated</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Products Grid -->
+          <% if (products.length > 0) { %>
+            <div class="products-grid four-columns">
+              <% products.forEach(product => { %>
+                <%- include('../partials/product-card', { product, isInWishlist: false }) %>
+              <% }) %>
+            </div>
+            
+            <!-- Pagination -->
+            <% if (pagination.totalPages > 1) { %>
+              <div class="pagination">
+                <% if (pagination.currentPage > 1) { %>
+                  <a href="/products/categories/<%= category %>?page=<%= pagination.currentPage - 1 %><%= filters.brand ? '&brand=' + filters.brand : '' %><%= filters.search ? '&search=' + filters.search : '' %><%= filters.sort ? '&sort=' + filters.sort : '' %>" class="page-link">
+                    <i class="fas fa-chevron-left"></i> Previous
+                  </a>
+                <% } %>
+                
+                <% for (let i = 1; i <= pagination.totalPages; i++) { %>
+                  <a href="/products/categories/<%= category %>?page=<%= i %><%= filters.brand ? '&brand=' + filters.brand : '' %><%= filters.search ? '&search=' + filters.search : '' %><%= filters.sort ? '&sort=' + filters.sort : '' %>" class="page-link <%= i === pagination.currentPage ? 'active' : '' %>">
+                    <%= i %>
+                  </a>
+                <% } %>
+                
+                <% if (pagination.currentPage < pagination.totalPages) { %>
+                  <a href="/products/categories/<%= category %>?page=<%= pagination.currentPage + 1 %><%= filters.brand ? '&brand=' + filters.brand : '' %><%= filters.search ? '&search=' + filters.search : '' %><%= filters.sort ? '&sort=' + filters.sort : '' %>" class="page-link">
+                    Next <i class="fas fa-chevron-right"></i>
+                  </a>
+                <% } %>
+              </div>
+            <% } %>
+          <% } else { %>
+            <div class="no-products">
+              <i class="fas fa-search"></i>
+              <h3>No products found</h3>
+              <p>Try adjusting your filters or search terms</p>
+              <a href="/products/categories/<%= category %>" class="btn btn-primary">Clear Filters</a>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- Mobile Filter Drawer -->
+<div class="drawer-overlay" id="filterOverlay"></div>
+<div class="drawer drawer-right" id="filterDrawer">
+  <div class="drawer-header">
+    <h3><i class="fas fa-sliders-h"></i> Filters</h3>
+    <button class="drawer-close" id="filterCloseBtn"><i class="fas fa-times"></i></button>
+  </div>
+  <div class="drawer-body">
+    <%- include('../partials/mobile-filters') %>
+  </div>
+  <div class="drawer-footer">
+    <a href="/products/categories/<%= category %>" class="btn btn-outline btn-block">Clear All</a>
+  </div>
+</div>
+
+<script>
+// Mobile filter toggle
+document.getElementById('filterToggleBtn')?.addEventListener('click', () => {
+  document.getElementById('filterDrawer').classList.add('open');
+  document.getElementById('filterOverlay').classList.add('active');
+});
+
+document.getElementById('filterCloseBtn')?.addEventListener('click', closeDrawer);
+document.getElementById('filterOverlay')?.addEventListener('click', closeDrawer);
+
+function closeDrawer() {
+  document.getElementById('filterDrawer')?.classList.remove('open');
+  document.getElementById('filterOverlay')?.classList.remove('active');
+}
+
+// Update single filter and rebuild URL
+function updateFilter(filterName, filterValue) {
+  const url = new URL(window.location.href);
+  
+  // Get all current params
+  const params = new URLSearchParams(url.search);
+  
+  // Set or remove the filter
+  if (filterValue === '' || filterValue === null) {
+    params.delete(filterName);
+  } else {
+    params.set(filterName, filterValue);
+  }
+  
+  // Reset to page 1 when filters change
+  params.delete('page');
+  
+  // Rebuild URL and navigate
+  window.location.href = '/products/categories/<%= category %>?' + params.toString();
+}
+
+// Filter toggle helper
+function toggleFilter(filterName, filterValue) {
+  const url = new URL(window.location.href);
+  if (url.searchParams.get(filterName) === filterValue) {
+    url.searchParams.delete(filterName);
+  } else {
+    url.searchParams.set(filterName, filterValue);
+  }
+  window.location.href = url.toString();
+}
+</script>
+
+<%- include('../partials/footer') %>

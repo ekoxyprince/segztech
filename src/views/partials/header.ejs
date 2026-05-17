@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="/images/segztech.png">
+  <link rel="shortcut icon" href="/images/segztech.png">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+</head>
+<body>
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <div class="container">
+      <div class="top-bar-content">
+        <div class="top-bar-left">
+          <span><i class="fas fa-truck"></i> Free Shipping on orders over ₦100,000</span>
+        </div>
+        <div class="top-bar-right">
+          <a href="/orders/track"><i class="fas fa-map-marker-alt"></i> Track Order</a>
+          <a href="/about"><i class="fas fa-question-circle"></i> Help</a>
+          <a href="/contact"><i class="fas fa-phone"></i> Contact</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Header -->
+  <header class="header">
+    <div class="container">
+      <div class="header-content">
+        <!-- Hamburger Menu (Mobile) -->
+        <button class="hamburger-btn" id="hamburgerBtn">
+          <i class="fas fa-bars"></i>
+        </button>
+        
+        <!-- Logo -->
+<a href="/" class="logo">
+  <img src="/images/segztech.png" alt="SegzTech" class="logo-img">
+</a>
+        
+        <!-- Search Bar (Desktop) -->
+        <div class="search-bar">
+          <form action="/products" method="GET" id="searchForm">
+            <div class="search-wrapper">
+              <input type="text" name="search" placeholder="Search products..." id="searchInput" autocomplete="off">
+              <button type="submit" class="search-btn">
+                <i class="fas fa-search"></i>
+              </button>
+            </div>
+            <div class="search-results" id="searchResults"></div>
+          </form>
+        </div>
+        
+        <!-- Header Actions -->
+        <div class="header-actions">
+          <!-- Mobile Search Icon -->
+          <button class="header-action mobile-search-btn" id="mobileSearchBtn">
+            <i class="fas fa-search"></i>
+          </button>
+          
+          <!-- Cart Drawer Button -->
+          <button class="header-action cart-drawer-btn" id="cartDrawerBtn">
+            <i class="fas fa-shopping-cart"></i>
+            <span class="action-text">Cart</span>
+            <% if (cartCount > 0) { %>
+              <span class="badge cart-badge"><%= cartCount %></span>
+            <% } %>
+          </button>
+          
+          <!-- Wishlist -->
+          <a href="/wishlist" class="header-action">
+            <i class="fas fa-heart"></i>
+            <span class="action-text">Wishlist</span>
+            <% if (wishlistCount > 0) { %>
+              <span class="badge wishlist-badge"><%= wishlistCount %></span>
+            <% } %>
+          </a>
+          
+          <!-- User Menu -->
+          <% if (user) { %>
+            <div class="header-action user-menu">
+              <a href="/user/profile" class="action-btn">
+                <i class="fas fa-user"></i>
+                <span class="action-text">Account</span>
+              </a>
+              <div class="user-dropdown">
+                <div class="dropdown-header">
+                  <img src="<%= user.avatar %>" alt="<%= user.firstName %>">
+                  <div>
+                    <strong><%= user.firstName %> <%= user.lastName %></strong>
+                    <small><%= user.email %></small>
+                  </div>
+                </div>
+                <div class="dropdown-links">
+                  <a href="/user/profile"><i class="fas fa-user"></i> My Profile</a>
+                  <a href="/orders"><i class="fas fa-box"></i> My Orders</a>
+                  <a href="/wishlist"><i class="fas fa-heart"></i> Wishlist</a>
+                  <a href="/user/addresses"><i class="fas fa-map-marker-alt"></i> Addresses</a>
+                </div>
+                <div class="dropdown-footer">
+                  <a href="/auth/logout" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </div>
+              </div>
+            </div>
+          <% } else { %>
+            <a href="/auth/login" class="header-action">
+              <i class="fas fa-user"></i>
+              <span class="action-text">Login</span>
+            </a>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </header>
+  
+  <!-- Navigation -->
+  <nav class="nav">
+    <div class="container">
+      <div class="nav-content">
+        <!-- Categories Dropdown -->
+        <div class="nav-categories">
+          <button class="categories-btn">
+            <i class="fas fa-bars"></i>
+            <span>All Categories</span>
+            <i class="fas fa-chevron-down"></i>
+          </button>
+          <div class="categories-dropdown">
+            <% if (categories && categories.length > 0) { %>
+              <% categories.forEach(cat => { %>
+                <a href="/products/categories/<%= cat.slug %>"><i class="fas fa-folder"></i> <%= cat.name %></a>
+              <% }) %>
+            <% } else { %>
+              <a href="/products/categories/phones"><i class="fas fa-mobile-alt"></i> Phones</a>
+              <a href="/products/categories/laptops"><i class="fas fa-laptop"></i> Laptops</a>
+              <a href="/products/categories/tablets"><i class="fas fa-tablet-alt"></i> Tablets</a>
+              <a href="/products/categories/accessories"><i class="fas fa-headphones"></i> Accessories</a>
+              <a href="/products/categories/wearables"><i class="fas fa-watch"></i> Wearables</a>
+              <a href="/products/categories/gaming"><i class="fas fa-gamepad"></i> Gaming</a>
+            <% } %>
+          </div>
+        </div>
+        
+        <!-- Nav Links -->
+        <ul class="nav-links">
+          <li><a href="/" class="<%= currentRoute === 'home' ? 'active' : '' %>">Home</a></li>
+          <li><a href="/products?sale=flash" class="flash-sale-link"><i class="fas fa-bolt"></i> Flash Sale</a></li>
+          <li><a href="/products" class="<%= currentRoute === 'products' ? 'active' : '' %>">All Products</a></li>
+          <li><a href="/products?sort=newest">New Arrivals</a></li>
+          <li><a href="/products?sale=hot">Hot Picks</a></li>
+        </ul>
+        
+        <!-- Nav Actions -->
+        <div class="nav-actions">
+          <a href="/products?sort=popular"><i class="fas fa-fire"></i> Best Sellers</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+  
+  <!-- Mobile Menu Drawer -->
+  <div class="drawer-overlay" id="menuOverlay"></div>
+  <div class="drawer drawer-left" id="menuDrawer">
+    <div class="drawer-header">
+      <h3><i class="fas fa-bars"></i> Menu</h3>
+      <button class="drawer-close" id="menuCloseBtn"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="drawer-body">
+      <nav class="mobile-nav">
+        <a href="/" class="mobile-nav-link <%= currentRoute === 'home' ? 'active' : '' %>">
+          <i class="fas fa-home"></i> Home
+        </a>
+        <a href="/products?sale=flash" class="mobile-nav-link flash-sale">
+          <i class="fas fa-bolt"></i> Flash Sale
+        </a>
+        <a href="/products" class="mobile-nav-link <%= currentRoute === 'products' ? 'active' : '' %>">
+          <i class="fas fa-th"></i> All Products
+        </a>
+        <a href="/products?sort=newest" class="mobile-nav-link">
+          <i class="fas fa-sparkles"></i> New Arrivals
+        </a>
+        <a href="/products?sale=hot" class="mobile-nav-link">
+          <i class="fas fa-fire"></i> Hot Picks
+        </a>
+        <a href="/products?sort=popular" class="mobile-nav-link">
+          <i class="fas fa-trophy"></i> Best Sellers
+        </a>
+        
+        <div class="mobile-nav-divider"></div>
+        <h4 class="mobile-nav-heading">Categories</h4>
+        <% if (categories && categories.length > 0) { %>
+          <% categories.forEach(cat => { %>
+            <a href="/products/categories/<%= cat.slug %>" class="mobile-nav-link">
+              <i class="fas fa-folder"></i> <%= cat.name %>
+            </a>
+          <% }) %>
+        <% } else { %>
+          <a href="/products/categories/phones" class="mobile-nav-link">
+            <i class="fas fa-mobile-alt"></i> Phones
+          </a>
+          <a href="/products/categories/laptops" class="mobile-nav-link">
+            <i class="fas fa-laptop"></i> Laptops
+          </a>
+          <a href="/products/categories/tablets" class="mobile-nav-link">
+            <i class="fas fa-tablet-alt"></i> Tablets
+          </a>
+          <a href="/products/categories/accessories" class="mobile-nav-link">
+            <i class="fas fa-headphones"></i> Accessories
+          </a>
+          <a href="/products/categories/wearables" class="mobile-nav-link">
+            <i class="fas fa-clock"></i> Wearables
+          </a>
+          <a href="/products/categories/gaming" class="mobile-nav-link">
+            <i class="fas fa-gamepad"></i> Gaming
+          </a>
+        <% } %>
+        
+        <div class="mobile-nav-divider"></div>
+        <h4 class="mobile-nav-heading">Account</h4>
+        <% if (user) { %>
+          <a href="/user/profile" class="mobile-nav-link">
+            <i class="fas fa-user"></i> My Profile
+          </a>
+          <a href="/orders" class="mobile-nav-link">
+            <i class="fas fa-box"></i> My Orders
+          </a>
+          <a href="/wishlist" class="mobile-nav-link">
+            <i class="fas fa-heart"></i> Wishlist
+          </a>
+          <a href="/auth/logout" class="mobile-nav-link logout">
+            <i class="fas fa-sign-out-alt"></i> Logout
+          </a>
+        <% } else { %>
+          <a href="/auth/login" class="mobile-nav-link">
+            <i class="fas fa-sign-in-alt"></i> Login
+          </a>
+          <a href="/auth/register" class="mobile-nav-link">
+            <i class="fas fa-user-plus"></i> Register
+          </a>
+        <% } %>
+      </nav>
+    </div>
+  </div>
+  
+  <!-- Mobile Search Drawer -->
+  <div class="drawer-overlay" id="searchOverlay"></div>
+  <div class="drawer drawer-bottom" id="searchDrawer">
+    <div class="drawer-header">
+      <h3><i class="fas fa-search"></i> Search Products</h3>
+      <button class="drawer-close" id="searchCloseBtn"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="drawer-body">
+      <form action="/products" method="GET" class="mobile-search-form">
+        <div class="mobile-search-input">
+          <i class="fas fa-search"></i>
+          <input type="text" name="search" placeholder="Search for phones, laptops, accessories..." id="mobileSearchInput" autocomplete="off">
+        </div>
+      </form>
+      <div class="mobile-search-results" id="mobileSearchResults"></div>
+      <div class="mobile-search-suggestions">
+        <h4>Popular Searches</h4>
+        <div class="search-tags">
+          <a href="/products?search=iphone" class="search-tag">iPhone</a>
+          <a href="/products?search=samsung" class="search-tag">Samsung</a>
+          <a href="/products?search=laptop" class="search-tag">Laptops</a>
+          <a href="/products?search=headphones" class="search-tag">Headphones</a>
+          <a href="/products?category=phones" class="search-tag">Phones</a>
+          <a href="/products?sale=flash" class="search-tag">Flash Sale</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Cart Drawer -->
+  <div class="drawer-overlay" id="cartOverlay"></div>
+  <div class="drawer drawer-right" id="cartDrawer">
+    <div class="drawer-header">
+      <h3><i class="fas fa-shopping-cart"></i> My Cart</h3>
+      <button class="drawer-close" id="cartCloseBtn"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="drawer-body" id="cartDrawerBody">
+      <div class="cart-drawer-loading">
+        <div class="skeleton-card">
+          <div class="skeleton-image"></div>
+          <div class="skeleton-content">
+            <div class="skeleton-line title"></div>
+            <div class="skeleton-line medium"></div>
+            <div class="skeleton-line price"></div>
+          </div>
+        </div>
+        <div class="skeleton-card">
+          <div class="skeleton-image"></div>
+          <div class="skeleton-content">
+            <div class="skeleton-line title"></div>
+            <div class="skeleton-line medium"></div>
+            <div class="skeleton-line price"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="drawer-footer" id="cartDrawerFooter">
+      <div class="cart-drawer-total">
+        <span>Subtotal:</span>
+        <strong id="cartDrawerTotal">₦0.00</strong>
+      </div>
+      <a href="/cart" class="btn btn-outline btn-block btn-sm">View Cart</a>
+      <a href="/orders/checkout" class="btn btn-primary btn-block btn-sm">Checkout</a>
+    </div>
+  </div>
+</body>
+</html>

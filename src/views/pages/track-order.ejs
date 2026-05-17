@@ -1,0 +1,164 @@
+<%- include('../partials/header') %>
+
+<main class="main-content">
+  <section class="page-header">
+    <div class="container">
+      <h1 class="page-title">Track Your Order</h1>
+    </div>
+  </section>
+  
+  <section style="padding: 60px 0;">
+    <div class="container">
+      <div style="max-width: 700px; margin: 0 auto;">
+        <!-- Search Form -->
+        <div style="background: #fff; padding: 40px; border-radius: 12px; margin-bottom: 30px;">
+          <div style="text-align: center; margin-bottom: 32px;">
+            <i class="fas fa-truck" style="font-size: 48px; color: #ff9900; margin-bottom: 16px;"></i>
+            <h2>Enter your order number</h2>
+            <p style="color: #666;">Track your order status and delivery updates</p>
+          </div>
+          
+          <form id="trackForm">
+            <div class="form-group">
+              <input type="text" id="orderNumber" placeholder="Enter order number (e.g., ST-20250422-001)" 
+                value="<%= orderNumber || '' %>"
+                style="width: 100%; padding: 16px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px;">
+            </div>
+            <button type="submit" class="btn btn-primary btn-block" style="padding: 16px;">
+              <i class="fas fa-search"></i> Track Order
+            </button>
+          </form>
+        </div>
+        
+        <!-- Order Found - Show Details -->
+        <% if (orderNumber && order) { %>
+        <div style="background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+          <div style="background: #ff9900; color: #fff; padding: 20px 30px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <h3 style="margin: 0; font-size: 18px;">Order <%= order.orderNumber %></h3>
+                <p style="margin: 5px 0 0; opacity: 0.9; font-size: 14px;">Placed on <%= new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></p>
+              </div>
+              <div style="text-align: right;">
+                <span style="background: rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 20px; font-size: 14px; text-transform: capitalize;">
+                  <%= order.status %>
+                </span>
+              </div>
+            </div>
+          </div>
+          
+          <div style="padding: 30px;">
+            <!-- Order Items -->
+            <div style="margin-bottom: 30px;">
+              <h4 style="margin-bottom: 15px; font-size: 16px; color: #333;">Order Items</h4>
+              <% order.items.forEach(item => { %>
+              <div style="display: flex; gap: 15px; padding: 15px 0; border-bottom: 1px solid #eee;">
+                <div style="width: 80px; height: 80px; background: #f5f5f5; border-radius: 8px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
+                  <% if (item.image) { %>
+                    <img src="<%= item.image %>" alt="<%= item.name %>" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+                  <% } else { %>
+                    <i class="fas fa-box" style="color: #ccc; font-size: 24px;"></i>
+                  <% } %>
+                </div>
+                <div style="flex: 1;">
+                  <h5 style="margin: 0 0 5px; font-size: 15px;"><%= item.name %></h5>
+                  <p style="margin: 0; color: #666; font-size: 13px;">Qty: <%= item.quantity %> × ₦<%= item.price.toFixed(2) %></p>
+                </div>
+                <div style="text-align: right;">
+                  <span style="font-weight: 600; color: #333;">₦<%= (item.quantity * item.price).toFixed(2) %></span>
+                </div>
+              </div>
+              <% }) %>
+            </div>
+            
+            <!-- Order Summary -->
+            <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                <span style="color: #666;">Subtotal</span>
+                <span>₦<%= (order.subtotal || order.total).toFixed(2) %></span>
+              </div>
+              <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                <span style="color: #666;">Shipping</span>
+                <span><%= order.shippingCost > 0 ? '₦' + order.shippingCost.toFixed(2) : 'Free' %></span>
+              </div>
+              <% if (order.tax > 0) { %>
+              <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                <span style="color: #666;">Tax</span>
+                <span>₦<%= order.tax.toFixed(2) %></span>
+              </div>
+              <% } %>
+              <div style="display: flex; justify-content: space-between; padding-top: 10px; border-top: 1px solid #ddd; font-weight: 600; font-size: 18px;">
+                <span>Total</span>
+                <span style="color: #ff9900;">₦<%= order.total.toFixed(2) %></span>
+              </div>
+            </div>
+            
+            <!-- Shipping Address -->
+            <% if (order.shippingAddress) { %>
+            <div style="margin-bottom: 30px;">
+              <h4 style="margin-bottom: 15px; font-size: 16px; color: #333;">Shipping Address</h4>
+              <div style="background: #f9f9f9; padding: 20px; border-radius: 8px;">
+                <p style="margin: 0; color: #555; line-height: 1.6;">
+                  <%= order.shippingAddress.fullName %><br>
+                  <%= order.shippingAddress.street %><br>
+                  <%= order.shippingAddress.city %>, <%= order.shippingAddress.state %> <%= order.shippingAddress.zipCode %><br>
+                  <%= order.shippingAddress.country %>
+                </p>
+              </div>
+            </div>
+            <% } %>
+            
+            <!-- Tracking Timeline -->
+            <% if (order.timeline && order.timeline.length > 0) { %>
+            <div>
+              <h4 style="margin-bottom: 20px; font-size: 16px; color: #333;">Order Timeline</h4>
+              <div style="position: relative; padding-left: 30px;">
+                <div style="position: absolute; left: 8px; top: 0; bottom: 0; width: 2px; background: #e0e0e0;"></div>
+                <% order.timeline.forEach((event, index) => { %>
+                <div style="position: relative; padding-bottom: 25px;">
+                  <div style="position: absolute; left: -26px; top: 0; width: 16px; height: 16px; border-radius: 50%; background: <%= index === order.timeline.length - 1 ? '#ff9900' : '#4CAF50' %>; border: 3px solid #fff; box-shadow: 0 0 0 2px #e0e0e0;"></div>
+                  <div>
+                    <h5 style="margin: 0 0 5px; font-size: 14px; color: #333; text-transform: capitalize;"><%= event.status.replace(/_/g, ' ') %></h5>
+                    <p style="margin: 0; color: #666; font-size: 12px;"><%= new Date(event.createdAt).toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) %></p>
+                    <% if (event.note) { %>
+                    <p style="margin: 5px 0 0; color: #888; font-size: 13px;"><%= event.note %></p>
+                    <% } %>
+                  </div>
+                </div>
+                <% }) %>
+              </div>
+            </div>
+            <% } %>
+          </div>
+        </div>
+        <% } %>
+        
+        <!-- Order Not Found -->
+        <% if (orderNumber && !order) { %>
+        <div style="background: #fff; padding: 60px; border-radius: 12px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+          <i class="fas fa-times-circle" style="font-size: 64px; color: #dc3545; margin-bottom: 20px;"></i>
+          <h3 style="margin-bottom: 10px;">Order Not Found</h3>
+          <p style="color: #666; margin-bottom: 20px;">We couldn't find an order with number "<%= orderNumber %>". Please check and try again.</p>
+          <a href="/orders/track" class="btn btn-primary">Try Again</a>
+        </div>
+        <% } %>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+$('#trackForm').submit(function(e) {
+  e.preventDefault();
+  var orderNumber = $('#orderNumber').val().trim();
+  
+  if (!orderNumber) {
+    alert('Please enter an order number');
+    return;
+  }
+  
+  window.location.href = '/orders/track/' + encodeURIComponent(orderNumber);
+});
+</script>
+
+<%- include('../partials/footer') %>

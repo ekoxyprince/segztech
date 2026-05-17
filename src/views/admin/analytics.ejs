@@ -1,0 +1,664 @@
+<!-- Page Header -->
+<div class="page-header">
+  <div class="page-header-content">
+    <h2><i class="fas fa-chart-line"></i> Analytics & Insights</h2>
+    <p class="text-muted">Comprehensive store performance, user behavior, and AI-powered insights</p>
+  </div>
+  <div class="page-header-actions">
+    <select id="dateRange" class="form-control" style="width: 150px; display: inline-block; margin-right: 10px;">
+      <option value="7">Last 7 days</option>
+      <option value="14">Last 14 days</option>
+      <option value="30" selected>Last 30 days</option>
+      <option value="90">Last 90 days</option>
+    </select>
+    <button class="btn btn-sm btn-outline" onclick="loadAnalytics()">
+      <i class="fas fa-sync-alt"></i> Refresh
+    </button>
+  </div>
+</div>
+
+<!-- AI Insights Alert -->
+<div class="alert alert-info" id="aiInsights" style="display: none; margin-bottom: 20px;">
+  <i class="fas fa-robot"></i> <strong>AI Insights:</strong> <span id="aiInsightText"></span>
+</div>
+
+<!-- Stats Overview -->
+<div class="stats-grid" id="statsGrid">
+  <div id="loadingStats" class="loading-state" style="display: none; grid-column: 1 / -1;">
+    <div class="spinner"></div>
+    <span>Loading stats...</span>
+  </div>
+</div>
+
+<!-- Charts Row -->
+<div class="charts-row" id="chartsRow">
+  <div id="loadingCharts" class="loading-state" style="display: none; grid-column: 1 / -1;">
+    <div class="spinner"></div>
+    <span>Loading charts...</span>
+  </div>
+  
+  <!-- Top Searched Products -->
+  <div class="chart-card" id="searchedCard">
+    <div class="card-header">
+      <h3><i class="fas fa-search"></i> Most Searched</h3>
+      <span class="chart-legend">Top search queries</span>
+    </div>
+    <div class="chart-content">
+      <div class="top-products-list" id="topSearchedList">
+        <div class="empty-state">
+          <i class="fas fa-search"></i>
+          <p>Loading...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Top Viewed Products -->
+  <div class="chart-card" id="viewedCard">
+    <div class="card-header">
+      <h3><i class="fas fa-eye"></i> Most Viewed</h3>
+      <span class="chart-legend">By product views</span>
+    </div>
+    <div class="chart-content">
+      <div class="top-products-list" id="topViewedList">
+        <div class="empty-state">
+          <i class="fas fa-eye"></i>
+          <p>Loading...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Top Clicked Products -->
+  <div class="chart-card" id="clickedCard">
+    <div class="card-header">
+      <h3><i class="fas fa-hand-pointer"></i> Most Clicked</h3>
+      <span class="chart-legend">From search results</span>
+    </div>
+    <div class="chart-content">
+      <div class="top-products-list" id="topClickedList">
+        <div class="empty-state">
+          <i class="fas fa-hand-pointer"></i>
+          <p>Loading...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Second Charts Row -->
+<div class="charts-row" id="chartsRow2">
+  <!-- Regional Distribution -->
+  <div class="chart-card" id="regionalCard">
+    <div class="card-header">
+      <h3><i class="fas fa-globe"></i> Regional Distribution</h3>
+      <span class="chart-legend">Customer locations</span>
+    </div>
+    <div class="chart-content">
+      <div id="regionalList">
+        <div class="empty-state">
+          <i class="fas fa-globe"></i>
+          <p>Loading...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Device Breakdown -->
+  <div class="chart-card" id="deviceCard">
+    <div class="card-header">
+      <h3><i class="fas fa-mobile-alt"></i> Device Breakdown</h3>
+      <span class="chart-legend">User devices</span>
+    </div>
+    <div class="chart-content">
+      <div class="device-chart" id="deviceChart">
+        <div class="device-bar">
+          <div class="device-icon"><i class="fas fa-desktop"></i></div>
+          <div class="device-info">
+            <span class="device-label">Desktop</span>
+            <div class="device-progress">
+              <div class="device-progress-fill desktop" id="desktopBar" style="width: 0%"></div>
+            </div>
+            <span class="device-percent" id="desktopPercent">0%</span>
+          </div>
+        </div>
+        <div class="device-bar">
+          <div class="device-icon"><i class="fas fa-mobile-alt"></i></div>
+          <div class="device-info">
+            <span class="device-label">Mobile</span>
+            <div class="device-progress">
+              <div class="device-progress-fill mobile" id="mobileBar" style="width: 0%"></div>
+            </div>
+            <span class="device-percent" id="mobilePercent">0%</span>
+          </div>
+        </div>
+        <div class="device-bar">
+          <div class="device-icon"><i class="fas fa-tablet-alt"></i></div>
+          <div class="device-info">
+            <span class="device-label">Tablet</span>
+            <div class="device-progress">
+              <div class="device-progress-fill tablet" id="tabletBar" style="width: 0%"></div>
+            </div>
+            <span class="device-percent" id="tabletPercent">0%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Order Status -->
+  <div class="chart-card" id="statusCard">
+    <div class="card-header">
+      <h3><i class="fas fa-chart-pie"></i> Order Status</h3>
+      <span class="chart-legend">Current orders</span>
+    </div>
+    <div class="chart-content">
+      <div class="status-bars" id="statusBars">
+        <div class="status-bar-item">
+          <span class="status-label">Pending</span>
+          <div class="status-bar">
+            <div class="status-bar-fill pending" id="pendingBar" style="width: 0%"></div>
+          </div>
+          <span class="status-count" id="pendingCount">0</span>
+        </div>
+        <div class="status-bar-item">
+          <span class="status-label">Processing</span>
+          <div class="status-bar">
+            <div class="status-bar-fill processing" id="processingBar" style="width: 0%"></div>
+          </div>
+          <span class="status-count" id="processingCount">0</span>
+        </div>
+        <div class="status-bar-item">
+          <span class="status-label">Shipped</span>
+          <div class="status-bar">
+            <div class="status-bar-fill shipped" id="shippedBar" style="width: 0%"></div>
+          </div>
+          <span class="status-count" id="shippedCount">0</span>
+        </div>
+        <div class="status-bar-item">
+          <span class="status-label">Delivered</span>
+          <div class="status-bar">
+            <div class="status-bar-fill delivered" id="deliveredBar" style="width: 0%"></div>
+          </div>
+          <span class="status-count" id="deliveredCount">0</span>
+        </div>
+        <div class="status-bar-item">
+          <span class="status-label">Cancelled</span>
+          <div class="status-bar">
+            <div class="status-bar-fill cancelled" id="cancelledBar" style="width: 0%"></div>
+          </div>
+          <span class="status-count" id="cancelledCount">0</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Customer Journey Section -->
+<div class="chart-card" id="journeyCard" style="margin-top: 20px;">
+  <div class="card-header">
+    <h3><i class="fas fa-route"></i> Customer Journey Funnel</h3>
+    <span class="chart-legend">View to Purchase conversion</span>
+  </div>
+  <div class="chart-content">
+    <div class="funnel-chart" id="funnelChart">
+      <div class="funnel-step">
+        <div class="funnel-label">Product Views</div>
+        <div class="funnel-bar">
+          <div class="funnel-fill views" id="viewsBar" style="width: 100%"></div>
+        </div>
+        <div class="funnel-value" id="viewsValue">0</div>
+      </div>
+      <div class="funnel-step">
+        <div class="funnel-label">Added to Cart</div>
+        <div class="funnel-bar">
+          <div class="funnel-fill carts" id="cartsBar" style="width: 0%"></div>
+        </div>
+        <div class="funnel-value" id="cartsValue">0</div>
+      </div>
+      <div class="funnel-step">
+        <div class="funnel-label">Purchases</div>
+        <div class="funnel-bar">
+          <div class="funnel-fill purchases" id="purchasesBar" style="width: 0%"></div>
+        </div>
+        <div class="funnel-value" id="purchasesValue">0</div>
+      </div>
+    </div>
+    <div class="funnel-stats">
+      <div class="funnel-stat">
+        <span class="funnel-stat-label">Cart Conversion</span>
+        <span class="funnel-stat-value" id="cartConversion">0%</span>
+      </div>
+      <div class="funnel-stat">
+        <span class="funnel-stat-label">Purchase Conversion</span>
+        <span class="funnel-stat-value" id="purchaseConversion">0%</span>
+      </div>
+      <div class="funnel-stat">
+        <span class="funnel-stat-label">Search CTR</span>
+        <span class="funnel-stat-value" id="searchCtr">0%</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.device-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+.device-bar {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+.device-icon {
+  width: 40px;
+  font-size: 20px;
+  color: #666;
+}
+.device-info {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.device-label {
+  width: 60px;
+  font-size: 13px;
+  color: #666;
+}
+.device-progress {
+  flex: 1;
+  height: 12px;
+  background: #f0f0f0;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.device-progress-fill {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.5s ease;
+}
+.device-progress-fill.desktop { background: linear-gradient(90deg, #0984e3, #74b9ff); }
+.device-progress-fill.mobile { background: linear-gradient(90deg, #00b894, #55efc4); }
+.device-progress-fill.tablet { background: linear-gradient(90deg, #6c5ce7, #a29bfe); }
+.device-percent {
+  width: 40px;
+  font-weight: 600;
+  color: #333;
+  text-align: right;
+}
+.funnel-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.funnel-step {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+.funnel-label {
+  width: 120px;
+  font-size: 13px;
+  color: #666;
+}
+.funnel-bar {
+  flex: 1;
+  height: 30px;
+  background: #f5f5f5;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.funnel-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.8s ease;
+}
+.funnel-fill.views { background: linear-gradient(90deg, #0984e3, #74b9ff); }
+.funnel-fill.carts { background: linear-gradient(90deg, #fdcb6e, #ffeaa7); }
+.funnel-fill.purchases { background: linear-gradient(90deg, #00b894, #55efc4); }
+.funnel-value {
+  width: 60px;
+  font-weight: 600;
+  color: #333;
+  text-align: right;
+}
+.funnel-stats {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  padding-top: 15px;
+  border-top: 1px solid #eee;
+}
+.funnel-stat {
+  text-align: center;
+}
+.funnel-stat-label {
+  display: block;
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 5px;
+}
+.funnel-stat-value {
+  font-size: 20px;
+  font-weight: 600;
+  color: #ff6a00;
+}
+</style>
+
+<script>
+$(document).ready(function() {
+  loadAnalytics();
+  
+  $('#dateRange').on('change', function() {
+    loadAnalytics();
+  });
+  
+  function loadAnalytics() {
+    var days = $('#dateRange').val();
+    
+    $('#loadingStats').show();
+    $('#loadingCharts').show();
+    
+    $.when(
+      $.get('/admin/api/analytics'),
+      $.get('/api/analytics/dashboard?days=' + days),
+      $.get('/api/analytics/top-searches?limit=10&days=' + days),
+      $.get('/api/analytics/top-products?limit=10&days=' + days + '&metric=views'),
+      $.get('/api/analytics/regional?limit=10')
+    ).done(function(analyticsRes, dashboardRes, searchesRes, productsRes, regionalRes) {
+      var orderData = analyticsRes[0];
+      var dashboardData = dashboardRes[0];
+      var topSearches = searchesRes[0].searches || [];
+      var topProducts = productsRes[0].products || [];
+      var regionalData = regionalRes[0].insights || [];
+      
+      if (orderData.success) {
+        renderOrderStats(orderData.analytics);
+      }
+      
+      if (dashboardData.success) {
+        renderDashboardStats(dashboardData.stats);
+        renderTopSearches(topSearches);
+        renderTopViewedProducts(topProducts);
+        renderRegionalDistribution(regionalData);
+        renderFunnel(dashboardData.stats);
+        renderDeviceBreakdown(dashboardData.stats);
+        generateAIInsights(dashboardData.stats, topSearches, topProducts, regionalData);
+      }
+    }).fail(function() {
+      showToast('Failed to load analytics', 'error');
+    }).always(function() {
+      $('#loadingStats').hide();
+      $('#loadingCharts').hide();
+    });
+  }
+  
+  function renderOrderStats(analytics) {
+    var totalOrders = Object.values(analytics.orderStatusCounts).reduce(function(a, b) { return a + b; }, 0);
+    
+    if (totalOrders === 0) return;
+    
+    var statuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
+    
+    statuses.forEach(function(status) {
+      var count = analytics.orderStatusCounts[status] || 0;
+      var percent = (count / totalOrders) * 100;
+      $('#' + status + 'Bar').css('width', percent + '%');
+      $('#' + status + 'Count').text(count);
+    });
+  }
+  
+  function renderDashboardStats(stats) {
+    var completionRate = stats.totalSessions > 0 
+      ? Math.round((stats.purchases / stats.totalSessions) * 100) 
+      : 0;
+    
+    var html = `
+      <div class="stat-card">
+        <div class="stat-icon" style="background: rgba(9, 132, 227, 0.1); color: #0984e3;">
+          <i class="fas fa-users"></i>
+        </div>
+        <div class="stat-content">
+          <span class="stat-label">Total Visitors</span>
+          <span class="stat-value">${stats.totalSessions || 0}</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background: rgba(255, 106, 0, 0.1); color: #ff6a00;">
+          <i class="fas fa-eye"></i>
+        </div>
+        <div class="stat-content">
+          <span class="stat-label">Product Views</span>
+          <span class="stat-value">${stats.productViews || 0}</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background: rgba(0, 184, 148, 0.1); color: #00b894;">
+          <i class="fas fa-shopping-cart"></i>
+        </div>
+        <div class="stat-content">
+          <span class="stat-label">Cart Adds</span>
+          <span class="stat-value">${stats.cartAdds || 0}</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background: rgba(108, 92, 231, 0.1); color: #6c5ce7;">
+          <i class="fas fa-mouse-pointer"></i>
+        </div>
+        <div class="stat-content">
+          <span class="stat-label">Searches</span>
+          <span class="stat-value">${stats.totalSearches || 0}</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background: rgba(253, 203, 110, 0.1); color: #fdcb6e;">
+          <i class="fas fa-percentage"></i>
+        </div>
+        <div class="stat-content">
+          <span class="stat-label">Conversion Rate</span>
+          <span class="stat-value">${stats.conversionRate || 0}%</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background: rgba(0, 206, 201, 0.1); color: #00cece;">
+          <i class="fas fa-search"></i>
+        </div>
+        <div class="stat-content">
+          <span class="stat-label">Avg. Search CTR</span>
+          <span class="stat-value">${stats.avgCtr || 0}%</span>
+        </div>
+      </div>
+    `;
+    
+    $('#statsGrid').html(html);
+  }
+  
+  function renderTopSearches(searches) {
+    if (searches.length === 0) {
+      $('#topSearchedList').html(`
+        <div class="empty-state">
+          <i class="fas fa-search"></i>
+          <p>No search data yet</p>
+        </div>
+      `);
+      return;
+    }
+    
+    var html = searches.slice(0, 8).map(function(item, index) {
+      return `
+        <div class="top-product-item">
+          <span class="rank">#${index + 1}</span>
+          <div class="product-details">
+            <span class="product-name">${item.query}</span>
+            <span class="product-sold">${item.count} searches</span>
+          </div>
+          ${item.ctr > 0 ? '<span class="product-ctr">' + item.ctr + '% CTR</span>' : ''}
+        </div>
+      `;
+    }).join('');
+    
+    $('#topSearchedList').html(html);
+  }
+  
+  function renderTopViewedProducts(products) {
+    if (products.length === 0) {
+      $('#topViewedList').html(`
+        <div class="empty-state">
+          <i class="fas fa-eye"></i>
+          <p>No view data yet</p>
+        </div>
+      `);
+      return;
+    }
+    
+    var html = products.slice(0, 5).map(function(product, index) {
+      return `
+        <div class="top-product-item">
+          <span class="rank">#${index + 1}</span>
+          <div class="product-details">
+            <span class="product-name">${product.name || 'Product'}</span>
+            <span class="product-sold">${product.value} views</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+    
+    $('#topViewedList').html(html);
+  }
+  
+  function renderRegionalDistribution(regions) {
+    if (regions.length === 0) {
+      $('#regionalList').html(`
+        <div class="empty-state">
+          <i class="fas fa-globe"></i>
+          <p>No regional data yet</p>
+        </div>
+      `);
+      
+      $.get('/admin/api/analytics').done(function(data) {
+        if (data.success) {
+          var totalOrders = Object.values(data.analytics.orderStatusCounts).reduce(function(a, b) { return a + b; }, 0);
+          $('#regionalList').html(`
+            <div class="regional-item">
+              <span class="regional-label"><i class="fas fa-globe"></i> Global</span>
+              <span class="regional-value">${totalOrders} orders</span>
+            </div>
+          `);
+        }
+      });
+      return;
+    }
+    
+    var maxSessions = Math.max(...regions.map(r => r.sessions));
+    
+    var html = regions.slice(0, 6).map(function(region) {
+      var percent = maxSessions > 0 ? (region.sessions / maxSessions) * 100 : 0;
+      return `
+        <div class="regional-item">
+          <span class="regional-label">${region.country || 'Unknown'}</span>
+          <div class="regional-bar">
+            <div class="regional-bar-fill" style="width: ${percent}%"></div>
+          </div>
+          <span class="regional-value">${region.sessions} visits</span>
+        </div>
+      `;
+    }).join('');
+    
+    $('#regionalList').html(html);
+  }
+  
+  function renderFunnel(stats) {
+    var views = stats.productViews || 0;
+    var carts = stats.cartAdds || 0;
+    var purchases = stats.purchases || 0;
+    var maxViews = Math.max(views, carts, purchases, 1);
+    
+    var viewsWidth = (views / maxViews) * 100;
+    var cartsWidth = (carts / maxViews) * 100;
+    var purchasesWidth = (purchases / maxViews) * 100;
+    
+    $('#viewsBar').css('width', viewsWidth + '%');
+    $('#cartsBar').css('width', cartsWidth + '%');
+    $('#purchasesBar').css('width', purchasesWidth + '%');
+    
+    $('#viewsValue').text(views);
+    $('#cartsValue').text(carts);
+    $('#purchasesValue').text(purchases);
+    
+    var cartConv = views > 0 ? ((carts / views) * 100).toFixed(1) : 0;
+    var purchConv = views > 0 ? ((purchases / views) * 100).toFixed(1) : 0;
+    
+    $('#cartConversion').text(cartConv + '%');
+    $('#purchaseConversion').text(purchConv + '%');
+    $('#searchCtr').text(stats.avgCtr + '%');
+  }
+  
+  function renderDeviceBreakdown(stats) {
+    var devices = stats.deviceStats || { desktop: 0, mobile: 0, tablet: 0 };
+    var total = devices.desktop + devices.mobile + devices.tablet;
+    
+    if (total === 0) {
+      $('#desktopPercent').text('0%');
+      $('#mobilePercent').text('0%');
+      $('#tabletPercent').text('0%');
+      $('#desktopBar').css('width', '0%');
+      $('#mobileBar').css('width', '0%');
+      $('#tabletBar').css('width', '0%');
+      return;
+    }
+    
+    var desktopPercent = Math.round((devices.desktop / total) * 100);
+    var mobilePercent = Math.round((devices.mobile / total) * 100);
+    var tabletPercent = Math.round((devices.tablet / total) * 100);
+    
+    $('#desktopPercent').text(desktopPercent + '%');
+    $('#mobilePercent').text(mobilePercent + '%');
+    $('#tabletPercent').text(tabletPercent + '%');
+    $('#desktopBar').css('width', desktopPercent + '%');
+    $('#mobileBar').css('width', mobilePercent + '%');
+    $('#tabletBar').css('width', tabletPercent + '%');
+  }
+  
+  function generateAIInsights(stats, searches, products, regions) {
+    var insights = [];
+    
+    if (searches.length > 0) {
+      var topSearch = searches[0];
+      insights.push(`"${topSearch.query}" is your most searched term with ${topSearch.count} queries. Consider featuring related products.`);
+    }
+    
+    if (products.length > 0) {
+      var topProduct = products[0];
+      insights.push(`"${topProduct.name}" is your most viewed product with ${topProduct.value} views. Ensure optimal stock levels.`);
+    }
+    
+    if (regions.length > 0) {
+      var topRegion = regions[0];
+      insights.push(`${topRegion.country || 'Your region'} drives ${topRegion.sessions} visits - consider localized promotions.`);
+    }
+    
+    var convRate = parseFloat(stats.conversionRate) || 0;
+    if (convRate < 2) {
+      insights.push(`Conversion rate is ${convRate}%. Optimize product pages and checkout flow to improve sales.`);
+    } else if (convRate > 5) {
+      insights.push(`Excellent ${convRate}% conversion rate! Your optimization efforts are paying off.`);
+    }
+    
+    if (stats.cartAdds > 0 && stats.purchases > 0) {
+      var cartRate = ((stats.cartAdds - stats.purchases) / stats.cartAdds * 100).toFixed(0);
+      if (cartRate > 50) {
+        insights.push(`${cartRate}% cart abandonment detected. Consider offering free shipping or limited-time discounts.`);
+      }
+    }
+    
+    if (insights.length > 0) {
+      $('#aiInsightText').text(insights[Math.floor(Math.random() * insights.length)]);
+      $('#aiInsights').show();
+    }
+  }
+});
+</script>

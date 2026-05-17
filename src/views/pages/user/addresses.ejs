@@ -1,0 +1,203 @@
+<%- include('../../partials/header') %>
+
+<main class="main-content">
+  <section class="user-dashboard">
+    <div class="container">
+      <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <aside class="dashboard-sidebar">
+          <div class="user-info">
+            <img src="<%= user ? user.avatar : '/images/default-avatar.png' %>" alt="<%= user ? user.firstName : 'User' %>">
+            <h3><%= user ? user.firstName + ' ' + user.lastName : 'User' %></h3>
+            <p><%= user ? user.email : '' %></p>
+          </div>
+          <nav class="dashboard-nav">
+            <a href="/user/profile"><i class="fas fa-user"></i> My Profile</a>
+            <a href="/orders"><i class="fas fa-box"></i> My Orders</a>
+            <a href="/wishlist"><i class="fas fa-heart"></i> Wishlist</a>
+            <a href="/user/addresses" class="active"><i class="fas fa-map-marker-alt"></i> Addresses</a>
+            <a href="/user/password"><i class="fas fa-lock"></i> Change Password</a>
+            <a href="/auth/logout" class="logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+          </nav>
+        </aside>
+        
+        <!-- Main Content -->
+        <div class="dashboard-content">
+          <div class="content-header">
+            <h1>My Addresses</h1>
+            <button class="btn btn-primary" onclick="showAddForm()">
+              <i class="fas fa-plus"></i> Add New Address
+            </button>
+          </div>
+          
+          <% if (success) { %>
+            <div class="alert alert-success">
+              <i class="fas fa-check-circle"></i>
+              <%= success %>
+            </div>
+          <% } %>
+          <% if (error) { %>
+            <div class="alert alert-error">
+              <i class="fas fa-exclamation-circle"></i>
+              <%= error %>
+            </div>
+          <% } %>
+          
+          <!-- Add/Edit Address Form -->
+          <div class="add-address-form" id="addressForm" style="display: none;">
+            <h3 id="addressFormTitle">Add New Address</h3>
+            <form action="" method="POST" id="addressFormElement">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="label">Address Label</label>
+                  <input type="text" id="label" name="label" placeholder="e.g., Home, Office" required>
+                </div>
+                <div class="form-group">
+                  <label for="fullName">Full Name</label>
+                  <input type="text" id="fullName" name="fullName" required>
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input type="tel" id="phone" name="phone" required>
+              </div>
+              
+              <div class="form-group">
+                <label for="street">Street Address</label>
+                <input type="text" id="street" name="street" required>
+              </div>
+              
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="city">City</label>
+                  <input type="text" id="city" name="city" required>
+                </div>
+                <div class="form-group">
+                  <label for="state">State/Province</label>
+                  <input type="text" id="state" name="state" required>
+                </div>
+              </div>
+              
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="zipCode">ZIP/Postal Code</label>
+                  <input type="text" id="zipCode" name="zipCode" required>
+                </div>
+                <div class="form-group">
+                  <label for="country">Country</label>
+                  <select id="country" name="country" required>
+                    <option value="United States">United States</option>
+                    <option value="Canada">Canada</option>
+                    <option value="United Kingdom">United Kingdom</option>
+                    <option value="Australia">Australia</option>
+                  </select>
+                </div>
+              </div>
+              
+              <label class="checkbox-label">
+                <input type="checkbox" id="isDefault" name="isDefault">
+                <span>Set as default address</span>
+              </label>
+              
+              <div class="form-actions">
+                <button type="button" class="btn btn-outline" onclick="hideAddressForm()">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Address</button>
+              </div>
+            </form>
+          </div>
+          
+          <!-- Addresses List -->
+          <div class="addresses-grid">
+            <% if (addresses && addresses.length > 0) { %>
+              <% addresses.forEach(address => { %>
+                <div class="address-card-large <%= address.isDefault ? 'default' : '' %>">
+                  <% if (address.isDefault) { %>
+                    <span class="default-badge">Default</span>
+                  <% } %>
+                  <span class="address-label-tag"><%= address.label %></span>
+                  <h4><%= address.fullName %></h4>
+                  <p><%= address.street %></p>
+                  <p><%= address.city %>, <%= address.state %> <%= address.zipCode %></p>
+                  <p><%= address.country %></p>
+                  <p class="phone"><i class="fas fa-phone"></i> <%= address.phone %></p>
+                  
+                  <div class="address-actions">
+                    <% if (!address.isDefault) { %>
+                      <form action="/user/addresses/<%= address.id %>/default" method="POST" style="display: inline;">
+                        <button type="submit" class="btn-link">Set as Default</button>
+                      </form>
+                    <% } %>
+                    <button class="btn-link" onclick="editAddress('<%= address.id %>', '<%= address.label %>', '<%= address.fullName %>', '<%= address.phone %>', '<%= address.street %>', '<%= address.city %>', '<%= address.state %>', '<%= address.zipCode %>', '<%= address.country %>', <%= address.isDefault %>)">Edit</button>
+                    <button class="btn-link" onclick="deleteAddress('<%= address.id %>')">Delete</button>
+                  </div>
+                </div>
+              <% }) %>
+            <% } else { %>
+              <div class="empty-state">
+                <i class="fas fa-map-marker-alt"></i>
+                <h3>No addresses saved</h3>
+                <p>Add a shipping address to make checkout faster.</p>
+                <button class="btn btn-primary" onclick="showAddForm()">
+                  <i class="fas fa-plus"></i> Add Address
+                </button>
+              </div>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+function showAddForm() {
+  const form = document.getElementById('addressForm');
+  document.getElementById('addressFormTitle').textContent = 'Add New Address';
+  document.getElementById('addressFormElement').action = '/user/addresses/add';
+  document.getElementById('label').value = '';
+  document.getElementById('fullName').value = '<%= user ? user.firstName + " " + user.lastName : "" %>';
+  document.getElementById('phone').value = '<%= user ? user.phone || "" : "" %>';
+  document.getElementById('street').value = '';
+  document.getElementById('city').value = '';
+  document.getElementById('state').value = '';
+  document.getElementById('zipCode').value = '';
+  document.getElementById('country').value = 'United States';
+  document.getElementById('isDefault').checked = false;
+  form.style.display = 'block';
+  form.scrollIntoView({ behavior: 'smooth' });
+}
+
+function editAddress(id, label, fullName, phone, street, city, state, zipCode, country, isDefault) {
+  const form = document.getElementById('addressForm');
+  document.getElementById('addressFormTitle').textContent = 'Edit Address';
+  document.getElementById('addressFormElement').action = '/user/addresses/' + id + '/update';
+  document.getElementById('label').value = label;
+  document.getElementById('fullName').value = fullName;
+  document.getElementById('phone').value = phone;
+  document.getElementById('street').value = street;
+  document.getElementById('city').value = city;
+  document.getElementById('state').value = state;
+  document.getElementById('zipCode').value = zipCode;
+  document.getElementById('country').value = country;
+  document.getElementById('isDefault').checked = isDefault;
+  form.style.display = 'block';
+  form.scrollIntoView({ behavior: 'smooth' });
+}
+
+function hideAddressForm() {
+  document.getElementById('addressForm').style.display = 'none';
+}
+
+function deleteAddress(addressId) {
+  if (confirm('Are you sure you want to delete this address?')) {
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/user/addresses/' + addressId + '/delete';
+    document.body.appendChild(form);
+    form.submit();
+  }
+}
+</script>
+
+<%- include('../../partials/footer') %>

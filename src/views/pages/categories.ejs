@@ -1,0 +1,48 @@
+<%- include('../partials/header') %>
+
+<main class="main-content">
+  <section class="page-header">
+    <div class="container">
+      <nav class="breadcrumb">
+        <a href="/">Home</a>
+        <span>/</span>
+        <span>Categories</span>
+      </nav>
+      <h1 class="page-title">Shop by Category</h1>
+    </div>
+  </section>
+  
+  <section style="padding: 60px 0;">
+    <div class="container">
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;">
+        <% categories.forEach(category => { %>
+          <a href="/products?category=<%= category.slug %>" style="background: #fff; border-radius: 12px; padding: 32px; text-align: center; transition: all 0.3s; display: block;" 
+            onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 10px 20px rgba(0,0,0,0.1)'"
+            onmouseout="this.style.transform='none'; this.style.boxShadow='none'">
+            <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #ff9900 0%, #f39c12 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 32px; color: #fff;">
+              <% if (category.icon === 'smartphone') { %>
+                <i class="fas fa-mobile-alt"></i>
+              <% } else if (category.icon === 'laptop') { %>
+                <i class="fas fa-laptop"></i>
+              <% } else if (category.icon === 'tablet') { %>
+                <i class="fas fa-tablet-alt"></i>
+              <% } else if (category.icon === 'headphones') { %>
+                <i class="fas fa-headphones"></i>
+              <% } else if (category.icon === 'watch') { %>
+                <i class="fas fa-clock"></i>
+              <% } else if (category.icon === 'controller') { %>
+                <i class="fas fa-gamepad"></i>
+              <% } else { %>
+                <i class="fas fa-box"></i>
+              <% } %>
+            </div>
+            <h3 style="font-size: 20px; margin-bottom: 8px;"><%= category.name %></h3>
+            <p style="color: #666;"><%= category.count %> Products</p>
+          </a>
+        <% }) %>
+      </div>
+    </div>
+  </section>
+</main>
+
+<%- include('../partials/footer') %>

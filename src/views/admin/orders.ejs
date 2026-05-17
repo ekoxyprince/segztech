@@ -1,0 +1,628 @@
+<!-- Page Header -->
+<div class="page-header">
+  <div>
+    <h2>Manage Orders</h2>
+    <p class="text-muted">Track and manage all customer orders</p>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="filters-bar">
+  <div class="filter-group">
+    <label>Status</label>
+    <select class="filter-select" id="statusFilter">
+      <option value="">All Status</option>
+      <option value="pending">Pending</option>
+      <option value="processing">Processing</option>
+      <option value="shipped">Shipped</option>
+      <option value="delivered">Delivered</option>
+      <option value="cancelled">Cancelled</option>
+    </select>
+  </div>
+  <div class="filter-group">
+    <label>Date</label>
+    <select class="filter-select" id="dateFilter">
+      <option value="">All Time</option>
+      <option value="today">Today</option>
+      <option value="week">This Week</option>
+      <option value="month">This Month</option>
+    </select>
+  </div>
+  <div class="filter-divider"></div>
+  <div class="filter-search">
+    <i class="fas fa-search"></i>
+    <input type="text" placeholder="Search by order ID, customer..." id="searchInput">
+  </div>
+  <div class="filter-results" id="filterResults">
+    <strong><%= orders ? orders.length : 0 %></strong> orders found
+  </div>
+</div>
+
+<!-- Orders Table -->
+<div class="table-card">
+  <div id="loadingState" class="loading-state" style="display: none;">
+    <div class="spinner"></div>
+    <span>Loading orders...</span>
+  </div>
+  <div class="table-responsive">
+    <table class="data-table" id="ordersTable">
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>Customer</th>
+          <th>Items</th>
+          <th>Total</th>
+          <th>Payment</th>
+          <th>Status</th>
+          <th>Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="ordersTableBody">
+        <% if (orders && orders.length > 0) { %>
+          <% orders.forEach(order => { %>
+            <tr data-id="<%= order.id %>">
+              <td>
+                <span class="order-id">#<%= order.orderNumber %></span>
+              </td>
+              <td>
+                <div class="customer-info">
+                  <span class="customer-name"><%= order.shippingAddress ? order.shippingAddress.fullName || 'N/A' : 'N/A' %></span>
+                  <span class="customer-email"><%= order.shippingAddress ? order.shippingAddress.phone || '' : '' %></span>
+                </div>
+              </td>
+              <td>
+                <span class="items-count"><%= order.items.length %> item(s)</span>
+              </td>
+              <td>
+                <span class="order-total">₦<%= order.total.toFixed(2) %></span>
+              </td>
+              <td>
+                <span class="payment-badge <%= order.paymentStatus %>">
+                  <%= order.paymentStatus %>
+                </span>
+              </td>
+              <td>
+                <span class="status-badge status-<%= order.status %>">
+                  <%= order.status %>
+                </span>
+              </td>
+              <td>
+                <span class="order-date"><%= new Date(order.createdAt).toLocaleDateString() %></span>
+              </td>
+              <td>
+                <div class="action-buttons">
+                  <button class="btn-icon view-order-btn" data-id="<%= order.id %>" title="View Details">
+                    <i class="fas fa-eye"></i>
+                  </button>
+                  <button class="btn-icon edit-order-btn" data-id="<%= order.id %>" title="Update Order">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          <% }) %>
+        <% } else { %>
+          <tr>
+            <td colspan="8" class="no-data">No orders found</td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- View Order Modal -->
+<div class="modal-overlay" id="viewOrderModal">
+  <div class="modal modal-xl">
+    <div class="modal-header">
+      <h3><i class="fas fa-shopping-bag"></i> Order Details</h3>
+      <button type="button" class="modal-close close-modal">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body" id="viewOrderBody">
+      <div class="loading-state">
+        <div class="spinner"></div>
+        <span>Loading...</span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline close-modal">Close</button>
+      <button type="button" class="btn btn-primary" id="viewEditOrderBtn">
+        <i class="fas fa-edit"></i> Update Order
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Order Modal -->
+<div class="modal-overlay" id="editOrderModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3><i class="fas fa-box-open"></i> Update Order</h3>
+      <button type="button" class="modal-close close-modal">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <form id="editOrderForm">
+      <div class="modal-body">
+        <input type="hidden" id="editOrderId">
+        
+        <div class="order-summary-bar">
+          <div class="summary-item">
+            <span class="summary-label">Order</span>
+            <span class="summary-value" id="editOrderNumber">#0000</span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">Customer</span>
+            <span class="summary-value" id="editOrderCustomer">-</span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">Total</span>
+            <span class="summary-value" id="editOrderTotal">₦0.00</span>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="editOrderStatus">Order Status <span class="text-danger">*</span></label>
+          <select class="form-control" id="editOrderStatus" name="status" required>
+            <option value="pending">Pending</option>
+            <option value="processing">Processing</option>
+            <option value="shipped">Shipped</option>
+            <option value="delivered">Delivered</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="editPaymentStatus">Payment Status <span class="text-danger">*</span></label>
+          <select class="form-control" id="editPaymentStatus" name="paymentStatus" required>
+            <option value="pending">Pending</option>
+            <option value="paid">Paid</option>
+            <option value="failed">Failed</option>
+            <option value="refunded">Refunded</option>
+          </select>
+        </div>
+        
+        <div class="form-section-title">
+          <i class="fas fa-truck"></i> Shipping Information
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="editShippingCarrier">Shipping Carrier</label>
+            <select class="form-control" id="editShippingCarrier" name="shippingCarrier">
+              <option value="">Select Carrier</option>
+              <option value="fedex">FedEx</option>
+              <option value="ups">UPS</option>
+              <option value="usps">USPS</option>
+              <option value="dhl">DHL</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="editTrackingNumber">Tracking Number</label>
+            <input type="text" class="form-control" id="editTrackingNumber" name="trackingNumber" placeholder="Enter tracking number">
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="editShippingAddress">Shipping Address</label>
+          <textarea class="form-control" id="editShippingAddress" name="shippingAddress" rows="3" placeholder="Full shipping address"></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label for="editOrderNotes">Order Notes</label>
+          <textarea class="form-control" id="editOrderNotes" name="notes" rows="3" placeholder="Add internal notes (not visible to customer)"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline close-modal">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="editOrderSubmitBtn">
+          <i class="fas fa-spinner fa-spin" style="display: none;"></i>
+          <span>Save Changes</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+$(document).ready(function() {
+  var allOrders = [];
+  var currentViewId = null;
+  var currentEditId = null;
+  
+  function formatDate(dateString) {
+    if (!dateString) return 'N/A';
+    var date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  }
+  
+  function debounce(func, wait) {
+    var timeout;
+    return function() {
+      var args = arguments;
+      clearTimeout(timeout);
+      timeout = setTimeout(function() { func.apply(this, args); }, wait);
+    };
+  }
+  
+  function loadOrders() {
+    $('#loadingState').show();
+    $('#ordersTableBody').hide();
+    
+    $.get('/admin/api/orders')
+      .done(function(data) {
+        if (data.success) {
+          allOrders = data.orders;
+          renderOrders(allOrders);
+          updateOrdersCount(allOrders.length);
+        }
+      })
+      .fail(function() {
+        showToast('Error loading orders', 'error');
+      })
+      .always(function() {
+        $('#loadingState').hide();
+        $('#ordersTableBody').show();
+      });
+  }
+  
+  function renderOrders(orders) {
+    if (orders.length === 0) {
+      $('#ordersTableBody').html(`
+        <tr>
+          <td colspan="8">
+            <div class="empty-state">
+              <i class="fas fa-shopping-bag"></i>
+              <p>No orders found</p>
+            </div>
+          </td>
+        </tr>
+      `);
+      return;
+    }
+    
+    var html = orders.map(function(order) {
+      return `
+        <tr data-id="${order.id}">
+          <td><span class="order-id">#${order.orderNumber}</span></td>
+          <td>
+            <div class="customer-info">
+              <span class="customer-name">${order.shippingAddress.fullName}</span>
+              <span class="customer-email">${order.shippingAddress.phone}</span>
+            </div>
+          </td>
+          <td><span class="items-count">${order.items.length} item(s)</span></td>
+          <td><span class="order-total">₦${order.total.toFixed(2)}</span></td>
+          <td><span class="payment-badge ${order.paymentStatus}">${order.paymentStatus}</span></td>
+          <td><span class="status-badge status-${order.status}">${order.status}</span></td>
+          <td><span class="order-date">${formatDate(order.createdAt)}</span></td>
+          <td>
+            <div class="action-buttons">
+              <button class="btn-icon view-order-btn" data-id="${order.id}" title="View Details">
+                <i class="fas fa-eye"></i>
+              </button>
+              <button class="btn-icon edit-order-btn" data-id="${order.id}" title="Update Order">
+                <i class="fas fa-edit"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+    
+    $('#ordersTableBody').html(html);
+  }
+  
+  function updateOrdersCount(count) {
+    $('#filterResults').html('<strong>' + count + '</strong> order' + (count !== 1 ? 's' : '') + ' found');
+  }
+  
+  function filterOrders() {
+    var status = $('#statusFilter').val();
+    var date = $('#dateFilter').val();
+    var search = $('#searchInput').val().toLowerCase();
+    
+    var filtered = allOrders;
+    
+    if (status) {
+      filtered = filtered.filter(function(o) { return o.status === status; });
+    }
+    
+    if (date) {
+      var now = new Date();
+      filtered = filtered.filter(function(o) {
+        var orderDate = new Date(o.createdAt);
+        if (date === 'today') {
+          return orderDate.toDateString() === now.toDateString();
+        } else if (date === 'week') {
+          var weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+          return orderDate >= weekAgo;
+        } else if (date === 'month') {
+          return orderDate.getMonth() === now.getMonth() && orderDate.getFullYear() === now.getFullYear();
+        }
+        return true;
+      });
+    }
+    
+    if (search) {
+      filtered = filtered.filter(function(o) {
+        return o.orderNumber.toLowerCase().includes(search) ||
+               o.shippingAddress.fullName.toLowerCase().includes(search) ||
+               o.shippingAddress.phone.includes(search);
+      });
+    }
+    
+    renderOrders(filtered);
+    updateOrdersCount(filtered.length);
+  }
+  
+  function openViewOrderModal(id) {
+    currentViewId = id;
+    var order = allOrders.find(function(o) { return o.id === id; });
+    
+    if (!order) {
+      showToast('Order not found', 'error');
+      return;
+    }
+    
+    $('#viewOrderModal').addClass('active');
+    $('body').css('overflow', 'hidden');
+    $('#viewOrderBody').html('<div class="loading-state"><div class="spinner"></div><span>Loading...</span></div>');
+    
+    $.get('/admin/api/orders/' + id)
+      .done(function(data) {
+        if (data.success) {
+          var order = data.order;
+          
+          var itemsHtml = order.items.map(function(item) {
+            return `
+              <div class="order-item-card">
+                <img src="${item.image || '/images/placeholder.jpg'}" alt="${item.name}" class="item-image">
+                <div class="item-details">
+                  <span class="item-name">${item.name}</span>
+                  <span class="item-qty">Qty: ${item.quantity} × ₦${item.price.toFixed(2)}</span>
+                </div>
+                <span class="item-price">₦${(item.price * item.quantity).toFixed(2)}</span>
+              </div>
+            `;
+          }).join('');
+          
+          var trackingHtml = '';
+          if (order.trackingNumber) {
+            trackingHtml = `
+              <div class="info-card">
+                <h4><i class="fas fa-truck"></i> Shipping Info</h4>
+                <div class="info-row">
+                  <span class="info-label">Carrier</span>
+                  <span class="info-value">${order.shippingCarrier || 'N/A'}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Tracking</span>
+                  <span class="info-value tracking-link">${order.trackingNumber}</span>
+                </div>
+              </div>
+            `;
+          }
+          
+          var html = `
+            <div class="order-details-container">
+              <div class="order-header-bar">
+                <div class="order-id-display">
+                  <span class="order-num">#${order.orderNumber}</span>
+                  <span class="status-badge status-${order.status}">${order.status}</span>
+                  <span class="payment-badge ${order.paymentStatus}">${order.paymentStatus}</span>
+                </div>
+                <div class="order-date-display">
+                  <i class="fas fa-calendar"></i> ${formatDate(order.createdAt)}
+                </div>
+              </div>
+              
+              <div class="order-content-grid">
+                <div class="order-main-column">
+                  <div class="info-card">
+                    <h4><i class="fas fa-user"></i> Customer Information</h4>
+                    <div class="info-row">
+                      <span class="info-label">Name</span>
+                      <span class="info-value">${order.shippingAddress.fullName}</span>
+                    </div>
+                    <div class="info-row">
+                      <span class="info-label">Phone</span>
+                      <span class="info-value">${order.shippingAddress.phone}</span>
+                    </div>
+                    <div class="info-row">
+                      <span class="info-label">Email</span>
+                      <span class="info-value">${order.shippingAddress.email || 'N/A'}</span>
+                    </div>
+                  </div>
+                  
+                  <div class="info-card">
+                    <h4><i class="fas fa-map-marker-alt"></i> Shipping Address</h4>
+                    <p class="address-text">${order.shippingAddress.street}<br>${order.shippingAddress.city}, ${order.shippingAddress.state} ${order.shippingAddress.zipCode}<br>${order.shippingAddress.country || 'USA'}</p>
+                  </div>
+                  
+                  ${trackingHtml}
+                </div>
+                
+                <div class="order-items-column">
+                  <div class="info-card">
+                    <h4><i class="fas fa-box"></i> Order Items (${order.items.length})</h4>
+                    <div class="order-items-list">
+                      ${itemsHtml}
+                    </div>
+                    <div class="order-summary">
+                      <div class="summary-row">
+                        <span>Subtotal</span>
+                        <span>₦${(order.subtotal || order.total).toFixed(2)}</span>
+                      </div>
+                      <div class="summary-row">
+                        <span>Shipping</span>
+                        <span>₦${(order.shipping || 0).toFixed(2)}</span>
+                      </div>
+                      <div class="summary-row">
+                        <span>Tax</span>
+                        <span>₦${(order.tax || 0).toFixed(2)}</span>
+                      </div>
+                      <div class="summary-row total">
+                        <span>Total</span>
+                        <span>₦${order.total.toFixed(2)}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              ${order.notes ? `
+              <div class="order-notes-card">
+                <h4><i class="fas fa-sticky-note"></i> Order Notes</h4>
+                <p>${order.notes}</p>
+              </div>
+              ` : ''}
+            </div>
+          `;
+          
+          $('#viewOrderBody').html(html);
+        }
+      })
+      .fail(function() {
+        $('#viewOrderBody').html('<div class="alert alert-danger">Failed to load order details</div>');
+      });
+  }
+  
+  function closeViewOrderModal() {
+    $('#viewOrderModal').removeClass('active');
+    $('body').css('overflow', '');
+    currentViewId = null;
+  }
+  
+  function openEditOrderModal(id) {
+    currentEditId = id;
+    var order = allOrders.find(function(o) { return o.id === id; });
+    
+    if (!order) {
+      showToast('Order not found', 'error');
+      return;
+    }
+    
+    $('#editOrderId').val(order.id);
+    $('#editOrderNumber').text('#' + order.orderNumber);
+    $('#editOrderCustomer').text(order.shippingAddress.fullName);
+    $('#editOrderTotal').text('₦' + order.total.toFixed(2));
+    $('#editOrderStatus').val(order.status);
+    $('#editPaymentStatus').val(order.paymentStatus);
+    $('#editShippingCarrier').val(order.shippingCarrier || '');
+    $('#editTrackingNumber').val(order.trackingNumber || '');
+    $('#editShippingAddress').val(order.shippingAddress ? 
+      order.shippingAddress.street + ', ' + order.shippingAddress.city + ', ' + order.shippingAddress.state + ' ' + order.shippingAddress.zipCode : '');
+    $('#editOrderNotes').val(order.notes || '');
+    
+    $('#editOrderModal').addClass('active');
+    $('body').css('overflow', 'hidden');
+  }
+  
+  function closeEditOrderModal() {
+    $('#editOrderModal').removeClass('active');
+    $('body').css('overflow', '');
+    currentEditId = null;
+  }
+  
+  $('#editOrderForm').on('submit', function(e) {
+    e.preventDefault();
+    
+    var shippingAddress = $('#editShippingAddress').val();
+    var addressParts = shippingAddress.split(',').map(function(s) { return s.trim(); });
+    
+    var formData = {
+      status: $('#editOrderStatus').val(),
+      paymentStatus: $('#editPaymentStatus').val(),
+      shippingCarrier: $('#editShippingCarrier').val(),
+      trackingNumber: $('#editTrackingNumber').val(),
+      notes: $('#editOrderNotes').val()
+    };
+    
+    if (addressParts.length >= 3) {
+      formData.shippingAddress = {
+        fullName: $('#editOrderCustomer').text(),
+        street: addressParts[0] || '',
+        city: addressParts[1] || '',
+        state: addressParts[2] || '',
+        zipCode: addressParts[3] || '',
+        phone: allOrders.find(function(o) { return o.id === currentEditId; }).shippingAddress.phone
+      };
+    }
+    
+    var $btn = $('#editOrderSubmitBtn');
+    var $icon = $btn.find('i');
+    var $span = $btn.find('span');
+    
+    $btn.prop('disabled', true);
+    $icon.addClass('fa-spin');
+    $icon.show();
+    $span.text('Saving...');
+    
+    $.ajax({
+      url: '/admin/api/orders/' + currentEditId,
+      method: 'PUT',
+      contentType: 'application/json',
+      data: JSON.stringify(formData)
+    })
+    .done(function(data) {
+      if (data.success) {
+        showToast('Order updated successfully', 'success');
+        closeEditOrderModal();
+        loadOrders();
+      } else {
+        showToast(data.message || 'Failed to update order', 'error');
+      }
+    })
+    .fail(function() {
+      showToast('Failed to update order', 'error');
+    })
+    .always(function() {
+      $btn.prop('disabled', false);
+      $icon.removeClass('fa-spin');
+      $icon.hide();
+      $span.text('Save Changes');
+    });
+  });
+  
+  $('#statusFilter, #dateFilter').on('change', filterOrders);
+  $('#searchInput').on('input', debounce(filterOrders, 300));
+  
+  $(document).on('click', '.view-order-btn', function(e) {
+    e.stopPropagation();
+    openViewOrderModal($(this).data('id'));
+  });
+  
+  $(document).on('click', '.edit-order-btn', function(e) {
+    e.stopPropagation();
+    openEditOrderModal($(this).data('id'));
+  });
+  
+  $('#viewEditOrderBtn').on('click', function() {
+    if (currentViewId) {
+      closeViewOrderModal();
+      openEditOrderModal(currentViewId);
+    }
+  });
+  
+  $('.modal-overlay').on('click', function(e) {
+    if (e.target === this) {
+      $(this).removeClass('active');
+      $('body').css('overflow', '');
+    }
+  });
+  
+  $(document).on('keydown', function(e) {
+    if (e.key === 'Escape') {
+      $('.modal-overlay.active').removeClass('active');
+      $('body').css('overflow', '');
+    }
+  });
+  
+  loadOrders();
+});
+</script>

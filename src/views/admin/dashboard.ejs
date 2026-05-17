@@ -1,0 +1,251 @@
+<!-- Stats Grid -->
+<div class="stats-grid" id="statsGrid">
+  <div class="stat-card">
+    <div class="stat-icon orange">
+      <i class="fas fa-box"></i>
+    </div>
+    <div class="stat-content">
+      <span class="stat-label">Total Products</span>
+      <span class="stat-value" id="statProducts">--</span>
+      <span class="stat-change up">
+        <i class="fas fa-arrow-up"></i> <span id="statProductsChange">--</span>
+      </span>
+    </div>
+  </div>
+  
+  <div class="stat-card">
+    <div class="stat-icon green">
+      <i class="fas fa-shopping-bag"></i>
+    </div>
+    <div class="stat-content">
+      <span class="stat-label">Total Orders</span>
+      <span class="stat-value" id="statOrders">--</span>
+      <span class="stat-change up">
+        <i class="fas fa-arrow-up"></i> <span id="statOrdersChange">--</span>
+      </span>
+    </div>
+  </div>
+  
+  <div class="stat-card">
+    <div class="stat-icon blue">
+      <i class="fas fa-users"></i>
+    </div>
+    <div class="stat-content">
+      <span class="stat-label">Total Users</span>
+      <span class="stat-value" id="statUsers">--</span>
+      <span class="stat-change up">
+        <i class="fas fa-arrow-up"></i> <span id="statUsersChange">--</span>
+      </span>
+    </div>
+  </div>
+  
+  <div class="stat-card">
+    <div class="stat-icon yellow">
+      <i class="fas fa-dollar-sign"></i>
+    </div>
+    <div class="stat-content">
+      <span class="stat-label">Total Revenue</span>
+      <span class="stat-value" id="statRevenue">--</span>
+      <span class="stat-change up">
+        <i class="fas fa-arrow-up"></i> <span id="statRevenueChange">--</span>
+      </span>
+    </div>
+  </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="quick-actions">
+  <div class="quick-actions-header">
+    <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
+  </div>
+  <div class="quick-actions-grid">
+    <a href="/admin/products" class="quick-action-item">
+      <div class="quick-action-icon orange">
+        <i class="fas fa-plus"></i>
+      </div>
+      <div class="quick-action-text">
+        <span class="quick-action-title">Add New Product</span>
+      </div>
+      <i class="fas fa-chevron-right quick-action-arrow"></i>
+    </a>
+    <a href="/admin/orders?status=pending" class="quick-action-item load-orders" data-status="pending">
+      <div class="quick-action-icon yellow">
+        <i class="fas fa-clock"></i>
+      </div>
+      <div class="quick-action-text">
+        <span class="quick-action-title">Pending Orders</span>
+        <span class="quick-action-count"><span id="pendingOrdersCount">--</span> orders</span>
+      </div>
+      <i class="fas fa-chevron-right quick-action-arrow"></i>
+    </a>
+    <a href="/admin/products?filter=lowstock" class="quick-action-item">
+      <div class="quick-action-icon red">
+        <i class="fas fa-exclamation-triangle"></i>
+      </div>
+      <div class="quick-action-text">
+        <span class="quick-action-title">Low Stock Items</span>
+        <span class="quick-action-count"><span id="lowStockCount">--</span> products</span>
+      </div>
+      <i class="fas fa-chevron-right quick-action-arrow"></i>
+    </a>
+    <a href="/admin/analytics" class="quick-action-item">
+      <div class="quick-action-icon blue">
+        <i class="fas fa-chart-bar"></i>
+      </div>
+      <div class="quick-action-text">
+        <span class="quick-action-title">View Analytics</span>
+        <span class="quick-action-count">Reports & Insights</span>
+      </div>
+      <i class="fas fa-chevron-right quick-action-arrow"></i>
+    </a>
+  </div>
+</div>
+
+<!-- Dashboard Grid -->
+<div class="dashboard-grid">
+  <!-- Recent Orders -->
+  <div class="dashboard-card">
+    <div class="card-header">
+      <div class="card-header-left">
+        <h3><i class="fas fa-shopping-bag"></i> Recent Orders</h3>
+        <span class="card-header-badge"><span id="orderCount">0</span> orders</span>
+      </div>
+      <button class="btn btn-sm btn-outline" onclick="loadOrders()">
+        <i class="fas fa-sync-alt"></i> Refresh
+      </button>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive" id="ordersTableContainer">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Customer</th>
+              <th>Amount</th>
+              <th>Status</th>
+              <th>Date</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="ordersTableBody">
+            <tr>
+              <td colspan="6" class="loading-cell">
+                <div class="loading-spinner">
+                  <i class="fas fa-spinner"></i> Loading orders...
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Recent Activity -->
+  <div class="dashboard-card activity-card">
+    <div class="card-header">
+      <h3><i class="fas fa-history"></i> Recent Activity</h3>
+    </div>
+    <div class="activity-list" id="activityList">
+      <div class="activity-item">
+        <div class="activity-icon order">
+          <i class="fas fa-shopping-bag"></i>
+        </div>
+        <div class="activity-content">
+          <p class="activity-text">Welcome to <strong>SegzTech Admin</strong></p>
+          <span class="activity-time">Dashboard loaded</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+$(document).ready(function() {
+  loadDashboard();
+  loadOrders();
+  
+  function loadDashboard() {
+    $.get('/admin/api/dashboard/stats')
+      .done(function(data) {
+        if (data.success) {
+          var stats = data.stats;
+          $('#statProducts').text(stats.totalProducts);
+          $('#statOrders').text(stats.totalOrders);
+          $('#statUsers').text(stats.totalUsers);
+          $('#statRevenue').text('₦' + stats.totalRevenue.toFixed(2));
+          $('#pendingOrdersCount').text(stats.pendingOrders);
+          $('#lowStockCount').text(stats.lowStockProducts);
+          $('.stat-value').addClass('loaded');
+        }
+      })
+      .fail(function() {
+        console.error('Error loading dashboard');
+      });
+  }
+  
+  function loadOrders(status) {
+    var url = status ? '/admin/api/orders?status=' + status : '/admin/api/orders';
+    
+    $('#ordersTableBody').html(`
+      <tr>
+        <td colspan="6" class="loading-cell">
+          <div class="loading-spinner">
+            <i class="fas fa-spinner fa-spin"></i> Loading orders...
+          </div>
+        </td>
+      </tr>
+    `);
+    
+    $.get(url)
+      .done(function(data) {
+        if (data.success && data.orders.length > 0) {
+          var html = '';
+          data.orders.slice(0, 5).forEach(function(order) {
+            html += `
+              <tr>
+                <td><span class="order-id">#${order.orderNumber}</span></td>
+                <td><div class="order-info"><span class="order-customer">${order.shippingAddress.fullName}</span></div></td>
+                <td><span class="order-total">₦${order.total.toFixed(2)}</span></td>
+                <td><span class="status-badge status-${order.status}">${order.status}</span></td>
+                <td><span class="order-date">${new Date(order.createdAt).toLocaleDateString()}</span></td>
+                <td><a href="/admin/orders/${order.id}" class="btn-icon" title="View"><i class="fas fa-eye"></i></a></td>
+              </tr>
+            `;
+          });
+          $('#ordersTableBody').html(html);
+          $('#orderCount').text(data.orders.length);
+        } else {
+          $('#ordersTableBody').html(`
+            <tr>
+              <td colspan="6">
+                <div class="no-data">
+                  <i class="fas fa-inbox"></i>
+                  <p>No orders found</p>
+                </div>
+              </td>
+            </tr>
+          `);
+        }
+      })
+      .fail(function() {
+        $('#ordersTableBody').html(`
+          <tr>
+            <td colspan="6">
+              <div class="no-data">
+                <i class="fas fa-exclamation-triangle"></i>
+                <p>Error loading orders</p>
+              </div>
+            </td>
+          </tr>
+        `);
+      });
+  }
+  
+  $('.load-orders').on('click', function(e) {
+    e.preventDefault();
+    var status = $(this).data('status');
+    window.location.href = '/admin/orders' + (status ? '?status=' + status : '');
+  });
+});
+</script>

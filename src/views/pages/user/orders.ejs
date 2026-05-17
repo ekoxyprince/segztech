@@ -1,0 +1,117 @@
+<%- include('../../partials/header') %>
+
+<main class="main-content">
+  <section class="user-dashboard">
+    <div class="container">
+      <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <aside class="dashboard-sidebar">
+          <div class="user-info">
+            <img src="<%= user.avatar %>" alt="<%= user.firstName %>">
+            <h3><%= user.firstName %> <%= user.lastName %></h3>
+            <p><%= user.email %></p>
+          </div>
+          <nav class="dashboard-nav">
+            <a href="/user/profile"><i class="fas fa-user"></i> My Profile</a>
+            <a href="/orders" class="active"><i class="fas fa-box"></i> My Orders</a>
+            <a href="/wishlist"><i class="fas fa-heart"></i> Wishlist</a>
+            <a href="/user/addresses"><i class="fas fa-map-marker-alt"></i> Addresses</a>
+            <a href="/user/password"><i class="fas fa-lock"></i> Change Password</a>
+            <a href="/auth/logout" class="logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+          </nav>
+        </aside>
+        
+        <!-- Main Content -->
+        <div class="dashboard-content">
+          <div class="content-header">
+            <h1>My Orders</h1>
+          </div>
+          
+          <!-- Order Stats -->
+          <div class="order-stats">
+            <a href="/orders" class="stat-badge <%= !filters.status || filters.status === 'all' ? 'active' : '' %>">
+              All (<%= stats.total %>)
+            </a>
+            <a href="/orders?status=pending" class="stat-badge <%= filters.status === 'pending' ? 'active' : '' %>">
+              Pending (<%= stats.pending %>)
+            </a>
+            <a href="/orders?status=processing" class="stat-badge <%= filters.status === 'processing' ? 'active' : '' %>">
+              Processing (<%= stats.processing %>)
+            </a>
+            <a href="/orders?status=shipped" class="stat-badge <%= filters.status === 'shipped' ? 'active' : '' %>">
+              Shipped (<%= stats.shipped %>)
+            </a>
+            <a href="/orders?status=delivered" class="stat-badge <%= filters.status === 'delivered' ? 'active' : '' %>">
+              Delivered (<%= stats.delivered %>)
+            </a>
+          </div>
+          
+          <!-- Orders List -->
+          <% if (orders.length > 0) { %>
+            <div class="orders-list">
+              <% orders.forEach(order => { %>
+                <div class="order-card">
+                  <div class="order-header">
+                    <div class="order-info">
+                      <span class="order-number">Order #<%= order.orderNumber %></span>
+                      <span class="order-date"><%= new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></span>
+                    </div>
+                    <span class="order-status status-<%= order.status %>"><%= order.status.charAt(0).toUpperCase() + order.status.slice(1) %></span>
+                  </div>
+                  
+                  <div class="order-items-preview">
+                    <% order.items.slice(0, 3).forEach(item => { %>
+                      <div class="item-preview">
+                        <img src="<%= item.image %>" alt="<%= item.name %>">
+                        <div class="item-details">
+                          <span class="item-name"><%= item.name %></span>
+                          <span class="item-qty">Qty: <%= item.quantity %></span>
+                        </div>
+                      </div>
+                    <% }) %>
+                    <% if (order.items.length > 3) { %>
+                      <div class="more-items">+<%= order.items.length - 3 %> more items</div>
+                    <% } %>
+                  </div>
+                  
+                  <div class="order-footer">
+                    <div class="order-total">
+                      <span>Total:</span>
+                      <strong>₦<%= order.total.toFixed(2) %></strong>
+                    </div>
+                    <div class="order-actions">
+                      <a href="/orders/<%= order.id %>" class="btn btn-outline btn-sm">View Details</a>
+                      <% if (order.status === 'shipped' && order.trackingNumber) { %>
+                        <a href="/orders/track/<%= order.orderNumber %>" class="btn btn-outline btn-sm">Track Order</a>
+                      <% } %>
+                    </div>
+                  </div>
+                </div>
+              <% }) %>
+            </div>
+            
+            <!-- Pagination -->
+            <% if (pagination.totalPages > 1) { %>
+              <div class="pagination">
+                <% for (let i = 1; i <= pagination.totalPages; i++) { %>
+                  <a href="/orders?page=<%= i %>&status=<%= filters.status || 'all' %>" class="page-link <%= i === pagination.currentPage ? 'active' : '' %>">
+                    <%= i %>
+                  </a>
+                <% } %>
+              </div>
+            <% } %>
+          <% } else { %>
+            <div class="empty-state">
+              <i class="fas fa-box-open"></i>
+              <h3>No orders found</h3>
+              <p>You haven't placed any orders yet.</p>
+              <a href="/products" class="btn btn-primary">Start Shopping</a>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<%- include('../../partials/footer') %>

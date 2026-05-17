@@ -1,0 +1,125 @@
+<%- include('../../partials/header') %>
+
+<main class="main-content">
+  <section class="user-dashboard">
+    <div class="container">
+      <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <aside class="dashboard-sidebar">
+          <div class="user-info">
+            <img src="<%= user.avatar %>" alt="<%= user.firstName %>">
+            <h3><%= user.firstName %> <%= user.lastName %></h3>
+            <p><%= user.email %></p>
+          </div>
+          <nav class="dashboard-nav">
+            <a href="/user/profile" class="<%= currentRoute === 'profile' ? 'active' : '' %>">
+              <i class="fas fa-user"></i> My Profile
+            </a>
+            <a href="/orders" class="<%= currentRoute === 'orders' ? 'active' : '' %>">
+              <i class="fas fa-box"></i> My Orders
+            </a>
+            <a href="/wishlist" class="<%= currentRoute === 'wishlist' ? 'active' : '' %>">
+              <i class="fas fa-heart"></i> Wishlist
+            </a>
+            <a href="/user/addresses" class="<%= currentRoute === 'addresses' ? 'active' : '' %>">
+              <i class="fas fa-map-marker-alt"></i> Addresses
+            </a>
+            <a href="/user/password" class="<%= currentRoute === 'password' ? 'active' : '' %>">
+              <i class="fas fa-lock"></i> Change Password
+            </a>
+            <a href="/auth/logout" class="logout">
+              <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+          </nav>
+        </aside>
+        
+        <!-- Main Content -->
+        <div class="dashboard-content">
+          <div class="content-header">
+            <h1>My Profile</h1>
+          </div>
+          
+          <% if (success) { %>
+            <div class="alert alert-success">
+              <i class="fas fa-check-circle"></i>
+              <%= success %>
+            </div>
+          <% } %>
+          
+          <% if (error) { %>
+            <div class="alert alert-error">
+              <i class="fas fa-exclamation-circle"></i>
+              <%= error %>
+            </div>
+          <% } %>
+          
+          <!-- Stats Cards -->
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon"><i class="fas fa-shopping-bag"></i></div>
+              <div class="stat-info">
+                <span class="stat-value"><%= stats.total %></span>
+                <span class="stat-label">Total Orders</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon"><i class="fas fa-truck"></i></div>
+              <div class="stat-info">
+                <span class="stat-value"><%= stats.delivered %></span>
+                <span class="stat-label">Delivered</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon"><i class="fas fa-clock"></i></div>
+              <div class="stat-info">
+                <span class="stat-value"><%= stats.processing + stats.shipped %></span>
+                <span class="stat-label">In Progress</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon"><i class="fas fa-dollar-sign"></i></div>
+              <div class="stat-info">
+                <span class="stat-value">₦<%= stats.totalSpent.toFixed(2) %></span>
+                <span class="stat-label">Total Spent</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Profile Form -->
+          <div class="profile-section">
+            <h2>Personal Information</h2>
+            <form action="/user/profile" method="POST" class="profile-form">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="firstName">First Name</label>
+                  <input type="text" id="firstName" name="firstName" value="<%= user.firstName %>" required>
+                </div>
+                <div class="form-group">
+                  <label for="lastName">Last Name</label>
+                  <input type="text" id="lastName" name="lastName" value="<%= user.lastName %>" required>
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" value="<%= user.email %>" disabled>
+                <span class="input-hint">Email cannot be changed</span>
+              </div>
+              
+              <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input type="tel" id="phone" name="phone" value="<%= user.phone || '' %>">
+              </div>
+              
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Save Changes
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<%- include('../../partials/footer') %>

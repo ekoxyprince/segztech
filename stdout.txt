@@ -1,0 +1,15 @@
+========================================
+SegzTech E-commerce Server
+========================================
+
+Connecting to database...
+Database connected successfully!
+
+Server running on http://localhost:3000
+Environment: development
+
+========================================
+Admin Panel: http://localhost:3000/admin
+Store:       http://localhost:3000
+========================================
+

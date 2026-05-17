@@ -1,0 +1,263 @@
+<%- include('../partials/header') %>
+
+<main class="main-content">
+  <!-- Hero Slider -->
+  <section class="hero-slider">
+    <div class="slider-container">
+      <% banners.forEach((banner, index) => { %>
+        <div class="slide <%= index === 0 ? 'active' : '' %>" style="background-image: url('<%= banner.image %>');">
+          <div class="slide-overlay"></div>
+          <div class="slide-content">
+            <span class="slide-subtitle"><%= banner.subtitle %></span>
+            <h2 class="slide-title"><%= banner.title %></h2>
+            <p class="slide-description"><%= banner.description %></p>
+            <a href="<%= banner.link %>" class="slide-btn">Shop Now <i class="fas fa-arrow-right"></i></a>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+    <div class="slider-controls">
+      <button class="slider-prev"><i class="fas fa-chevron-left"></i></button>
+      <div class="slider-dots">
+        <% banners.forEach((_, index) => { %>
+          <button class="dot <%= index === 0 ? 'active' : '' %>" data-index="<%= index %>"></button>
+        <% }) %>
+      </div>
+      <button class="slider-next"><i class="fas fa-chevron-right"></i></button>
+    </div>
+  </section>
+  
+  <!-- Categories Section -->
+  <section class="categories-section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Shop by Category</h2>
+        <a href="/products" class="view-all">View All <i class="fas fa-arrow-right"></i></a>
+      </div>
+      <div class="categories-grid">
+        <% categories.forEach(category => { %>
+          <a href="/products/categories/<%= category.slug %>" class="category-card">
+            <div class="category-icon">
+              <% if (category.icon) { %>
+                <i class="fas fa-<%= category.icon %>"></i>
+              <% } else { %>
+                <i class="fas fa-box"></i>
+              <% } %>
+            </div>
+            <h3><%= category.name %></h3>
+            <span class="category-count"><%= category.count || 0 %> Products</span>
+          </a>
+        <% }) %>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Flash Sale Section -->
+  <% if (showFlashSale) { %>
+  <section class="products-section flash-sale-section">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-title-wrapper">
+          <h2 class="section-title"><i class="fas fa-bolt"></i> Flash Sale</h2>
+          <% if (flashSaleEndDate) { %>
+          <div class="countdown-timer" id="flashSaleTimer" data-end="<%= new Date(flashSaleEndDate).toISOString() %>">
+            <div class="timer-block">
+              <span class="timer-value" id="days">00</span>
+              <span class="timer-label">Days</span>
+            </div>
+            <span class="timer-separator">:</span>
+            <div class="timer-block">
+              <span class="timer-value" id="hours">00</span>
+              <span class="timer-label">Hours</span>
+            </div>
+            <span class="timer-separator">:</span>
+            <div class="timer-block">
+              <span class="timer-value" id="minutes">00</span>
+              <span class="timer-label">Mins</span>
+            </div>
+            <span class="timer-separator">:</span>
+            <div class="timer-block">
+              <span class="timer-value" id="seconds">00</span>
+              <span class="timer-label">Secs</span>
+            </div>
+          </div>
+          <% } %>
+        </div>
+        <a href="/products?sale=flash" class="view-all">See All <i class="fas fa-arrow-right"></i></a>
+      </div>
+      <div class="products-grid">
+        <% flashSaleProducts.slice(0, 8).forEach(product => { %>
+          <%- include('../partials/product-card', { product, isInWishlist: false }) %>
+        <% }) %>
+      </div>
+    </div>
+  </section>
+  <% } %>
+  
+  <!-- Hot Picks Section -->
+  <section class="products-section hot-picks-section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title"><i class="fas fa-fire"></i> Hot Picks</h2>
+        <a href="/products?sale=hot" class="view-all">See All <i class="fas fa-arrow-right"></i></a>
+      </div>
+      <div class="products-grid">
+        <% hotPicks.slice(0, 4).forEach(product => { %>
+          <%- include('../partials/product-card', { product, isInWishlist: false }) %>
+        <% }) %>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Promo Banners -->
+  <section class="promo-section">
+    <div class="container">
+      <div class="promo-grid">
+        <a href="/products/categories/phones" class="promo-banner" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+          <div class="promo-content">
+            <span class="promo-tag">Smartphones</span>
+            <h3>Up to 30% OFF</h3>
+            <p>Latest phones from top brands</p>
+            <span class="promo-btn">Shop Now <i class="fas fa-arrow-right"></i></span>
+          </div>
+          <img src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=300" alt="Smartphones">
+        </a>
+        <a href="/products/categories/laptops" class="promo-banner" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+          <div class="promo-content">
+            <span class="promo-tag">Laptops</span>
+            <h3>Best Deals</h3>
+            <p>Powerful laptops for work & play</p>
+            <span class="promo-btn">Shop Now <i class="fas fa-arrow-right"></i></span>
+          </div>
+          <img src="https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=300" alt="Laptops">
+        </a>
+        <a href="/products/categories/accessories" class="promo-banner" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+          <div class="promo-content">
+            <span class="promo-tag">Accessories</span>
+            <h3>New Arrivals</h3>
+            <p>Premium accessories for your devices</p>
+            <span class="promo-btn">Shop Now <i class="fas fa-arrow-right"></i></span>
+          </div>
+          <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300" alt="Accessories">
+        </a>
+      </div>
+    </div>
+  </section>
+  
+  <!-- New Arrivals Section -->
+  <section class="products-section new-arrivals-section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title"><i class="fas fa-sparkles"></i> New Arrivals</h2>
+        <a href="/products?sort=newest" class="view-all">See All <i class="fas fa-arrow-right"></i></a>
+      </div>
+      <div class="products-grid">
+        <% newArrivals.slice(0, 4).forEach(product => { %>
+          <%- include('../partials/product-card', { product, isInWishlist: false }) %>
+        <% }) %>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Best Sellers Section -->
+  <section class="products-section best-sellers-section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title"><i class="fas fa-trophy"></i> Best Sellers</h2>
+        <a href="/products?sort=popular" class="view-all">See All <i class="fas fa-arrow-right"></i></a>
+      </div>
+      <div class="products-grid">
+        <% bestSellers.slice(0, 4).forEach(product => { %>
+          <%- include('../partials/product-card', { product, isInWishlist: false }) %>
+        <% }) %>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Brands Section -->
+  <section class="brands-section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Top Brands</h2>
+      </div>
+      <div class="brands-grid">
+        <% brands.slice(0, 6).forEach(brand => { %>
+          <a href="/products?brand=<%= brand.slug %>" class="brand-card">
+            <span><%= brand.name %></span>
+          </a>
+        <% }) %>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Features Section -->
+  <section class="features-section">
+    <div class="container">
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon"><i class="fas fa-truck"></i></div>
+          <div class="feature-content">
+            <h4>Free Shipping</h4>
+            <p>On orders over ₦100,000</p>
+          </div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon"><i class="fas fa-shield-alt"></i></div>
+          <div class="feature-content">
+            <h4>Secure Payment</h4>
+            <p>100% secure transactions</p>
+          </div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon"><i class="fas fa-undo"></i></div>
+          <div class="feature-content">
+            <h4>Easy Returns</h4>
+            <p>30-day return policy</p>
+          </div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon"><i class="fas fa-headset"></i></div>
+          <div class="feature-content">
+            <h4>24/7 Support</h4>
+            <p>Dedicated customer service</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<style>
+.countdown-timer .timer-value {
+  font-variant-numeric: tabular-nums;
+}
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var timer = document.getElementById('flashSaleTimer');
+  if (!timer) return;
+  var endDate = new Date(timer.dataset.end).getTime();
+  function updateTimer() {
+    var now = Date.now();
+    var diff = endDate - now;
+    if (diff <= 0) {
+      document.getElementById('days').textContent = '00';
+      document.getElementById('hours').textContent = '00';
+      document.getElementById('minutes').textContent = '00';
+      document.getElementById('seconds').textContent = '00';
+      return;
+    }
+    var days = Math.floor(diff / 86400000);
+    var hours = Math.floor((diff % 86400000) / 3600000);
+    var minutes = Math.floor((diff % 3600000) / 60000);
+    var seconds = Math.floor((diff % 60000) / 1000);
+    document.getElementById('days').textContent = String(days).padStart(2, '0');
+    document.getElementById('hours').textContent = String(hours).padStart(2, '0');
+    document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
+    document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
+  }
+  updateTimer();
+  setInterval(updateTimer, 1000);
+});
+</script>
+<%- include('../partials/footer') %>

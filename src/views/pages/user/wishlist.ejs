@@ -1,0 +1,215 @@
+<%- include('../../partials/header') %>
+
+<main class="main-content">
+  <section class="user-dashboard">
+    <div class="container">
+      <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <aside class="dashboard-sidebar">
+          <% if (user) { %>
+            <div class="user-info">
+              <img src="<%= user.avatar %>" alt="<%= user.firstName %>">
+              <h3><%= user.firstName %> <%= user.lastName %></h3>
+              <p><%= user.email %></p>
+            </div>
+            <nav class="dashboard-nav">
+              <a href="/user/profile"><i class="fas fa-user"></i> My Profile</a>
+              <a href="/orders"><i class="fas fa-box"></i> My Orders</a>
+              <a href="/wishlist" class="active"><i class="fas fa-heart"></i> Wishlist</a>
+              <a href="/user/addresses"><i class="fas fa-map-marker-alt"></i> Addresses</a>
+              <a href="/user/password"><i class="fas fa-lock"></i> Change Password</a>
+              <a href="/auth/logout" class="logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </nav>
+          <% } else { %>
+            <div class="user-info">
+              <i class="fas fa-user-circle" style="font-size: 60px; color: #ccc;"></i>
+              <h3>Guest</h3>
+              <p>Sign in to save your wishlist</p>
+            </div>
+            <nav class="dashboard-nav">
+              <a href="/wishlist" class="active"><i class="fas fa-heart"></i> Wishlist</a>
+              <a href="/auth/login"><i class="fas fa-sign-in-alt"></i> Login</a>
+              <a href="/auth/register"><i class="fas fa-user-plus"></i> Register</a>
+            </nav>
+          <% } %>
+        </aside>
+        
+        <!-- Main Content -->
+        <div class="dashboard-content">
+          <div class="content-header">
+            <h1>My Wishlist</h1>
+            <% if (wishlistItems.length > 0) { %>
+              <div class="header-actions">
+                <button class="btn btn-outline" onclick="moveAllToCart()">
+                  <i class="fas fa-shopping-cart"></i> Move All to Cart
+                </button>
+                <button class="btn btn-outline btn-danger" onclick="clearWishlist()">
+                  <i class="fas fa-trash"></i> Clear All
+                </button>
+              </div>
+            <% } %>
+          </div>
+          
+          <% if (wishlistItems.length > 0) { %>
+            <div class="wishlist-grid">
+              <% wishlistItems.forEach(item => { %>
+                <div class="wishlist-card" data-product-id="<%= item.id %>">
+                  <button class="remove-btn" onclick="removeFromWishlist('<%= item.id %>')">
+                    <i class="fas fa-times"></i>
+                  </button>
+                  
+                  <% if (item.discount > 0) { %>
+                    <span class="discount-badge">-<%= item.discount %>%</span>
+                  <% } %>
+                  
+                  <a href="/products/<%= item.slug %>" class="wishlist-image">
+                    <img src="<%= item.image %>" alt="<%= item.name %>">
+                  </a>
+                  
+                  <div class="wishlist-info">
+                    <a href="/products/<%= item.slug %>" class="wishlist-name"><%= item.name %></a>
+                    
+                    <div class="wishlist-rating">
+                      <% for (let i = 1; i <= 5; i++) { %>
+                        <i class="<%= i <= Math.floor(item.ratings) ? 'fas' : 'far' %> fa-star"></i>
+                      <% } %>
+                    </div>
+                    
+                    <div class="wishlist-price">
+                      <span class="current-price">₦<%= item.price.toFixed(2) %></span>
+                      <% if (item.originalPrice > item.price) { %>
+                        <span class="original-price">₦<%= item.originalPrice.toFixed(2) %></span>
+                      <% } %>
+                    </div>
+                    
+                    <div class="stock-status <%= item.inStock ? 'in-stock' : 'out-of-stock' %>">
+                      <%= item.inStock ? 'In Stock' : 'Out of Stock' %>
+                    </div>
+                    
+                    <button class="add-to-cart-btn" onclick="moveToCart('<%= item.id %>')" <%= !item.inStock ? 'disabled' : '' %>>
+                      <i class="fas fa-shopping-cart"></i> Add to Cart
+                    </button>
+                  </div>
+                </div>
+              <% }) %>
+            </div>
+          <% } else { %>
+            <div class="empty-state">
+              <i class="fas fa-heart"></i>
+              <h3>Your wishlist is empty</h3>
+              <p>Save items you love by clicking the heart icon on products.</p>
+              <a href="/products" class="btn btn-primary">Browse Products</a>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+function removeFromWishlist(productId) {
+  $.ajax({
+    url: '/wishlist/remove',
+    method: 'POST',
+    data: { productId },
+    success: function(response) {
+      if (response.success) {
+        $(`.wishlist-card[data-product-id="${productId}"]`).fadeOut(300, function() {
+          $(this).remove();
+          updateWishlistCount(response.wishlistCount);
+          
+          if ($('.wishlist-card').length === 0) {
+            location.reload();
+          }
+        });
+      }
+    }
+  });
+}
+
+function moveToCart(productId) {
+  $.ajax({
+    url: '/wishlist/move-to-cart',
+    method: 'POST',
+    data: { productId },
+    success: function(response) {
+      if (response.success) {
+        $(`.wishlist-card[data-product-id="${productId}"]`).fadeOut(300, function() {
+          $(this).remove();
+          updateWishlistCount(response.wishlistCount);
+          updateCartCount(response.cartCount);
+          
+          if ($('.wishlist-card').length === 0) {
+            location.reload();
+          }
+        });
+        
+        showNotification('Item moved to cart!', 'success');
+      } else {
+        showNotification(response.message, 'error');
+      }
+    }
+  });
+}
+
+function moveAllToCart() {
+  if (confirm('Move all items to cart?')) {
+    $.ajax({
+      url: '/wishlist/move-to-cart',
+      method: 'POST',
+      success: function(response) {
+        if (response.success) {
+          location.reload();
+          showNotification(`${response.addedCount} items moved to cart!`, 'success');
+        }
+      }
+    });
+  }
+}
+
+function clearWishlist() {
+  if (confirm('Are you sure you want to clear your wishlist?')) {
+    $.ajax({
+      url: '/wishlist/clear',
+      method: 'POST',
+      success: function() {
+        location.reload();
+      }
+    });
+  }
+}
+
+function updateWishlistCount(count) {
+  $('.wishlist-badge').text(count);
+  if (count === 0) {
+    $('.wishlist-badge').remove();
+  }
+}
+
+function updateCartCount(count) {
+  const cartBadge = $('.cart-badge');
+  if (count > 0) {
+    if (cartBadge.length) {
+      cartBadge.text(count);
+    } else {
+      $('.cart-action').append(`<span class="badge cart-badge">${count}</span>`);
+    }
+  } else {
+    cartBadge.remove();
+  }
+}
+
+function showNotification(message, type) {
+  const notification = $(`<div class="notification ${type}">${message}</div>`);
+  $('body').append(notification);
+  notification.addClass('show');
+  
+  setTimeout(() => {
+    notification.removeClass('show');
+    setTimeout(() => notification.remove(), 300);
+  }, 3000);
+}
+</script>
+
+<%- include('../../partials/footer') %>

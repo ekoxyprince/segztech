@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> | SegzTech Admin</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  
+  <!-- Admin CSS -->
+  <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+  <!-- Admin Sidebar -->
+  <aside class="admin-sidebar">
+    <div class="sidebar-header">
+      <a href="/admin/dashboard" class="admin-logo">
+        <img src="/images/segztech.png" alt="SegzTech">
+      </a>
+    </div>
+    
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <h4 class="nav-section-title">Main</h4>
+        <a href="/admin/dashboard" class="nav-link <%= page === 'dashboard' ? 'active' : '' %>">
+          <i class="fas fa-chart-line"></i>
+          <span>Dashboard</span>
+        </a>
+        <a href="/admin/analytics" class="nav-link <%= page === 'analytics' ? 'active' : '' %>">
+          <i class="fas fa-chart-pie"></i>
+          <span>Analytics</span>
+        </a>
+      </div>
+      
+      <div class="nav-section">
+        <h4 class="nav-section-title">Management</h4>
+        <a href="/admin/products" class="nav-link <%= page === 'products' ? 'active' : '' %>">
+          <i class="fas fa-box"></i>
+          <span>Products</span>
+        </a>
+        <a href="/admin/orders" class="nav-link <%= page === 'orders' ? 'active' : '' %>">
+          <i class="fas fa-shopping-bag"></i>
+          <span>Orders</span>
+        </a>
+        <a href="/admin/users" class="nav-link <%= page === 'users' ? 'active' : '' %>">
+          <i class="fas fa-users"></i>
+          <span>Users</span>
+        </a>
+        <a href="/admin/categories" class="nav-link <%= page === 'categories' ? 'active' : '' %>">
+          <i class="fas fa-tags"></i>
+          <span>Categories</span>
+        </a>
+        <a href="/admin/hierarchy" class="nav-link <%= page === 'hierarchy' ? 'active' : '' %>">
+          <i class="fas fa-sitemap"></i>
+          <span>Hierarchy</span>
+        </a>
+      </div>
+    </nav>
+    
+    <div class="sidebar-footer">
+      <a href="/" target="_blank" class="nav-link">
+        <i class="fas fa-external-link-alt"></i>
+        <span>View Store</span>
+      </a>
+      <a href="/auth/logout" class="nav-link">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Logout</span>
+      </a>
+    </div>
+  </aside>
+  
+  <!-- Admin Main Content -->
+  <main class="admin-main">
+    <!-- Top Header -->
+    <header class="admin-header">
+      <div class="header-left">
+        <button class="menu-toggle" id="menuToggle">
+          <i class="fas fa-bars"></i>
+        </button>
+        <h1 class="page-title"><%= title %></h1>
+      </div>
+      
+      <div class="header-right">
+        <div class="header-search">
+          <i class="fas fa-search"></i>
+          <input type="text" placeholder="Search...">
+        </div>
+        
+        <div class="header-actions">
+          <button class="header-btn">
+            <i class="fas fa-bell"></i>
+            <span class="badge">3</span>
+          </button>
+          
+          <div class="user-menu">
+            <img src="<%= user.avatar %>" alt="<%= user.firstName %>" class="user-avatar">
+            <div class="user-info">
+              <span class="user-name"><%= user.firstName %> <%= user.lastName %></span>
+              <span class="user-role">Administrator</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+    
+    <!-- Content Area -->
+    <div class="admin-content">
+      <%- body %>
+    </div>
+  </main>
+  
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  
+  <!-- Admin JS -->
+  <script src="/js/admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<aside class="admin-sidebar">
+  <div class="sidebar-header">
+<a href="/admin/dashboard" class="sidebar-logo">
+  <img src="/images/segztech.png" alt="SegzTech">
+</a>
+    <button class="sidebar-close" id="sidebarClose">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+  
+  <div class="sidebar-user">
+    <img src="<%= user.avatar %>" alt="<%= user.firstName %>" class="user-avatar">
+    <div class="user-info">
+      <span class="user-name"><%= user.firstName %> <%= user.lastName %></span>
+      <span class="user-role">
+        <i class="fas fa-shield-alt"></i> Administrator
+      </span>
+    </div>
+  </div>
+  
+  <nav class="sidebar-nav">
+    <div class="nav-group">
+      <span class="nav-group-title">Main</span>
+      <a href="/admin/dashboard" class="nav-item <%= page === 'dashboard' ? 'active' : '' %>">
+        <i class="nav-icon fas fa-chart-line"></i>
+        <span class="nav-text">Dashboard</span>
+      </a>
+      <a href="/admin/analytics" class="nav-item <%= page === 'analytics' ? 'active' : '' %>">
+        <i class="nav-icon fas fa-chart-pie"></i>
+        <span class="nav-text">Analytics</span>
+      </a>
+    </div>
+    
+    <div class="nav-group">
+      <span class="nav-group-title">Management</span>
+      <a href="/admin/products" class="nav-item <%= page === 'products' ? 'active' : '' %>">
+        <i class="nav-icon fas fa-box"></i>
+        <span class="nav-text">Products</span>
+        <span class="nav-badge">12</span>
+      </a>
+      <a href="/admin/orders" class="nav-item <%= page === 'orders' ? 'active' : '' %>">
+        <i class="nav-icon fas fa-shopping-bag"></i>
+        <span class="nav-text">Orders</span>
+        <span class="nav-badge warning">5</span>
+      </a>
+      <a href="/admin/users" class="nav-item <%= page === 'users' ? 'active' : '' %>">
+        <i class="nav-icon fas fa-users"></i>
+        <span class="nav-text">Users</span>
+      </a>
+      <a href="/admin/categories" class="nav-item <%= page === 'categories' ? 'active' : '' %>">
+        <i class="nav-icon fas fa-tags"></i>
+        <span class="nav-text">Categories</span>
+      </a>
+      <a href="/admin/flash-sales" class="nav-item <%= page === 'flash-sales' ? 'active' : '' %>">
+        <i class="nav-icon fas fa-bolt"></i>
+        <span class="nav-text">Flash Sales</span>
+      </a>
+    </div>
+    
+    <div class="nav-group">
+      <span class="nav-group-title">Settings</span>
+      <a href="/admin/settings" class="nav-item <%= page === 'settings' ? 'active' : '' %>">
+        <i class="nav-icon fas fa-cog"></i>
+        <span class="nav-text">Settings</span>
+      </a>
+      <a href="/admin/password" class="nav-item <%= page === 'settings' ? 'active' : '' %>">
+        <i class="nav-icon fas fa-key"></i>
+        <span class="nav-text">Password</span>
+      </a>
+    </div>
+  </nav>
+  
+  <div class="sidebar-footer">
+    <a href="/" target="_blank" class="nav-item">
+      <i class="nav-icon fas fa-external-link-alt"></i>
+      <span class="nav-text">View Store</span>
+    </a>
+    <a href="/admin/logout" class="nav-item logout">
+      <i class="nav-icon fas fa-sign-out-alt"></i>
+      <span class="nav-text">Logout</span>
+    </a>
+  </div>
+</aside>
+
+<!-- Mobile Overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>

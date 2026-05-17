@@ -1,0 +1,125 @@
+<!-- Page Header -->
+<div class="page-header">
+  <div>
+    <h2>Contact Messages</h2>
+    <p class="text-muted">Messages from the contact form</p>
+  </div>
+</div>
+
+<!-- Messages List -->
+<div class="table-card">
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Subject</th>
+          <th>Date</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (messages && messages.length > 0) { %>
+          <% messages.forEach(msg => { %>
+            <tr data-id="<%= msg.id %>">
+              <td>
+                <div class="customer-info">
+                  <span class="customer-name"><%= msg.name %></span>
+                </div>
+              </td>
+              <td>
+                <a href="mailto:<%= msg.email %>"><%= msg.email %></a>
+              </td>
+              <td>
+                <span class="message-subject"><%= msg.subject.length > 40 ? msg.subject.substring(0, 40) + '...' : msg.subject %></span>
+              </td>
+              <td>
+                <span class="order-date"><%= new Date(msg.created_at).toLocaleString() %></span>
+              </td>
+              <td>
+                <% if (msg.is_read) { %>
+                  <span class="status-badge status-delivered">Read</span>
+                <% } else { %>
+                  <span class="status-badge status-pending">Unread</span>
+                <% } %>
+              </td>
+              <td>
+                <div class="action-buttons">
+                  <a href="/admin/messages/<%= msg.id %>" class="btn-icon" title="View">
+                    <i class="fas fa-eye"></i>
+                  </a>
+                  <button class="btn-icon delete-message-btn" data-id="<%= msg.id %>" title="Delete">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          <% }) %>
+        <% } else { %>
+          <tr>
+            <td colspan="6" class="no-data">No messages yet</td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+
+  <% if (pagination && pagination.totalPages > 1) { %>
+    <div class="pagination">
+      <% if (pagination.currentPage > 1) { %>
+        <a href="/admin/messages?page=<%= pagination.currentPage - 1 %>" class="pagination-btn">
+          <i class="fas fa-chevron-left"></i>
+        </a>
+      <% } %>
+      <% for (var i = 1; i <= pagination.totalPages; i++) { %>
+        <% if (i === pagination.currentPage) { %>
+          <span class="pagination-btn active"><%= i %></span>
+        <% } else if (i === 1 || i === pagination.totalPages || Math.abs(i - pagination.currentPage) <= 2) { %>
+          <a href="/admin/messages?page=<%= i %>" class="pagination-btn"><%= i %></a>
+        <% } else if (Math.abs(i - pagination.currentPage) === 3) { %>
+          <span class="pagination-btn">...</span>
+        <% } %>
+      <% } %>
+      <% if (pagination.currentPage < pagination.totalPages) { %>
+        <a href="/admin/messages?page=<%= pagination.currentPage + 1 %>" class="pagination-btn">
+          <i class="fas fa-chevron-right"></i>
+        </a>
+      <% } %>
+    </div>
+  <% } %>
+</div>
+
+<script>
+$(document).ready(function() {
+  $(document).on('click', '.delete-message-btn', function() {
+    var id = $(this).data('id');
+    var $row = $(this).closest('tr');
+    if (confirm('Delete this message?')) {
+      $.ajax({
+        url: '/admin/messages/' + id,
+        method: 'DELETE'
+      })
+      .done(function() {
+        $row.fadeOut(300, function() { $(this).remove(); });
+        updateBadge();
+      });
+    }
+  });
+
+  function updateBadge() {
+    fetch('/admin/api/notification-count')
+      .then(r => r.json())
+      .then(data => {
+        var mb = document.getElementById('messageBadge');
+        if (mb && data.unreadMessages > 0) {
+          mb.style.display = 'inline';
+          mb.textContent = data.unreadMessages > 99 ? '99+' : data.unreadMessages;
+        } else if (mb) {
+          mb.style.display = 'none';
+        }
+      });
+  }
+});
+</script>

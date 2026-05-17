@@ -1,0 +1,350 @@
+<div class="page-header">
+  <div>
+    <h2>Product Hierarchy</h2>
+    <p class="page-subtitle">Manage categories, types, brands, models, and series</p>
+  </div>
+</div>
+
+<div class="hierarchy-layout">
+  <div class="hierarchy-panel" id="categoryPanel">
+    <div class="panel-header">
+      <h3><i class="fas fa-layer-group"></i> Categories</h3>
+    </div>
+    <div class="panel-body" id="categoryList"></div>
+    <div class="panel-footer">
+      <button class="panel-add-btn" onclick="openAddModal('category')"><i class="fas fa-plus"></i> Add Category</button>
+    </div>
+  </div>
+
+  <div class="hierarchy-panel" id="typePanel">
+    <div class="panel-header">
+      <h3><i class="fas fa-tags"></i> Types <span id="typePanelTitle" class="panel-subtitle"></span></h3>
+    </div>
+    <div class="panel-body" id="typeList"><p class="empty-msg">← Select a category</p></div>
+    <div class="panel-footer">
+      <button class="panel-add-btn" id="addTypeBtn" onclick="openAddModal('type')" style="display:none;"><i class="fas fa-plus"></i> Add Type</button>
+    </div>
+  </div>
+
+  <div class="hierarchy-panel" id="brandPanel">
+    <div class="panel-header">
+      <h3><i class="fas fa-building"></i> Brands <span id="brandPanelTitle" class="panel-subtitle"></span></h3>
+    </div>
+    <div class="panel-body" id="brandList"><p class="empty-msg">← Select a type or category</p></div>
+    <div class="panel-footer">
+      <button class="panel-add-btn" id="addBrandBtn" onclick="openAddModal('brand')" style="display:none;"><i class="fas fa-plus"></i> Add Brand</button>
+    </div>
+  </div>
+
+  <div class="hierarchy-panel" id="modelPanel">
+    <div class="panel-header">
+      <h3><i class="fas fa-cube"></i> Models <span id="modelPanelTitle" class="panel-subtitle"></span></h3>
+    </div>
+    <div class="panel-body" id="modelList"><p class="empty-msg">← Select a brand</p></div>
+    <div class="panel-footer">
+      <button class="panel-add-btn" id="addModelBtn" onclick="openAddModal('model')" style="display:none;"><i class="fas fa-plus"></i> Add Model</button>
+    </div>
+  </div>
+
+  <div class="hierarchy-panel" id="seriesPanel">
+    <div class="panel-header">
+      <h3><i class="fas fa-list-ol"></i> Series <span id="seriesPanelTitle" class="panel-subtitle"></span></h3>
+    </div>
+    <div class="panel-body" id="seriesList"><p class="empty-msg">← Select a model</p></div>
+    <div class="panel-footer">
+      <button class="panel-add-btn" id="addSeriesBtn" onclick="openAddModal('series')" style="display:none;"><i class="fas fa-plus"></i> Add Series</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="addItemModal">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h3 id="addItemTitle">Add Item</h3>
+      <button type="button" class="modal-close" onclick="closeAddModal()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label id="addItemLabel">Name</label>
+        <input type="text" class="form-control" id="addItemName" placeholder="Enter name">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeAddModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveNewItem()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="deleteConfirmModal">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h3><i class="fas fa-exclamation-triangle"></i> Confirm Delete</h3>
+      <button type="button" class="modal-close" onclick="closeDeleteModal()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <p>Are you sure you want to delete "<span id="deleteItemName"></span>"? This action cannot be undone.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeDeleteModal()">Cancel</button>
+      <button class="btn btn-danger" onclick="confirmDeleteItem()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<style>
+.hierarchy-layout{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-top:20px}
+.hierarchy-panel{background:var(--bg-secondary);border-radius:var(--radius-lg);overflow:hidden;min-height:450px;display:flex;flex-direction:column}
+.panel-header{padding:14px 16px;border-bottom:1px solid var(--border)}
+.panel-header h3{font-size:14px;font-weight:700;margin:0;display:flex;align-items:center;gap:8px}
+.panel-header h3 i{color:var(--primary);font-size:13px}
+.panel-subtitle{font-weight:400;color:var(--text-muted);font-size:12px}
+.panel-body{padding:8px;flex:1;overflow-y:auto}
+.panel-footer{padding:8px;border-top:1px solid var(--border)}
+.hierarchy-item{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:var(--radius);cursor:pointer;transition:all 0.2s;font-size:13px;user-select:none}
+.hierarchy-item:hover{background:var(--bg-primary)}
+.hierarchy-item.active{background:var(--primary);color:white}
+.hierarchy-item .item-count{background:var(--bg-primary);padding:2px 8px;border-radius:10px;font-size:11px;color:var(--text-muted)}
+.hierarchy-item.active .item-count{background:rgba(255,255,255,0.2);color:white}
+.empty-msg{color:var(--text-muted);font-size:13px;text-align:center;padding:40px 16px}
+.panel-add-btn{display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 12px;border:1px dashed var(--border);border-radius:var(--radius);color:var(--primary);font-size:12px;cursor:pointer;transition:all 0.2s;width:100%;background:none}
+.panel-add-btn:hover{background:var(--primary);color:white;border-color:var(--primary)}
+.item-delete{background:none;border:none;color:var(--text-muted);cursor:pointer;padding:2px 6px;border-radius:4px;font-size:11px;opacity:0;transition:opacity 0.2s}
+.hierarchy-item:hover .item-delete{opacity:1}
+.item-delete:hover{color:#ef4444;background:rgba(239,68,68,0.1)}
+.item-view{background:none;border:none;color:var(--text-muted);cursor:pointer;padding:2px 6px;border-radius:4px;font-size:11px;opacity:0;transition:opacity 0.2s;margin-right:4px;}
+.hierarchy-item:hover .item-view{opacity:1}
+.item-view:hover{color:var(--primary);background:rgba(0,0,0,0.05)}
+@media(max-width:1200px){.hierarchy-layout{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:768px){.hierarchy-layout{grid-template-columns:1fr}}
+</style>
+
+<script>
+var selectedCategory='';
+var selectedType='';
+var selectedBrand='';
+var selectedModel='';
+var hierarchyData={};
+var addMode='';
+
+$(document).ready(function(){loadHierarchy()});
+
+function loadHierarchy(){
+  $.get('/admin/api/hierarchy-data',function(d){
+    if(d.success){hierarchyData=d.hierarchy;renderCategories()}
+  }).fail(function(){showToast('Failed to load hierarchy','error')});
+}
+
+function renderCategories(){
+  var h='';
+  for(var s in hierarchyData){
+    if(!hierarchyData.hasOwnProperty(s))continue;
+    var c=hierarchyData[s];
+    var bc=c.brands?Object.keys(c.brands).length:0;
+    var a=s===selectedCategory?' active':'';
+    h+='<div class="hierarchy-item'+a+'" onclick="selectCategory(\''+s+'\')">';
+    h+='<span>'+(c.name||s)+'</span>';
+    h+='<span class="item-count">'+bc+' brands</span>';
+    h+='<button class="item-view" onclick="event.stopPropagation();window.location.href=\'/admin/products?category='+s+'\'" title="View Products"><i class="fas fa-box"></i></button>';
+    h+='<button class="item-delete" onclick="event.stopPropagation();deleteItem(\'category\', \''+s+'\')" title="Delete"><i class="fas fa-trash"></i></button>';
+    h+='</div>';
+  }
+  $('#categoryList').html(h||'<p class="empty-msg">No categories</p>');
+}
+
+function selectCategory(slug){
+  selectedCategory=slug;selectedType='';selectedBrand='';selectedModel='';
+  renderCategories();renderTypes();
+  var c=hierarchyData[slug];
+  if(c&&c.types&&c.types.length>0){
+    $('#brandList').html('<p class="empty-msg">← Select a type to view brands</p>');
+    $('#addBrandBtn').hide();
+  }else{
+    $('#addBrandBtn').show();
+  }
+  $('#modelList').html('<p class="empty-msg">← Select a brand</p>');
+  $('#seriesList').html('<p class="empty-msg">← Select a model</p>');
+  $('#typePanelTitle').text('('+hierarchyData[slug].name+')');
+  $('#brandPanelTitle,#modelPanelTitle,#seriesPanelTitle').text('');
+  $('#addTypeBtn').show();$('#addModelBtn,#addSeriesBtn').hide();
+}
+
+function renderTypes(){
+  var c=hierarchyData[selectedCategory];if(!c)return;
+  var types=c.types||[];var h='';
+  if(types.length===0){
+    h='<p class="empty-msg">No types defined<br><small>Brands shown directly</small></p>';
+    renderBrands();$('#typeList').html(h);return;
+  }
+  types.forEach(function(t){
+    var a=t===selectedType?' active':'';
+    h+='<div class="hierarchy-item'+a+'" onclick="selectType(\''+t.replace(/'/g,"\\'")+'\')">';
+    h+='<span>'+t+'</span>';
+    h+='<button class="item-delete" onclick="event.stopPropagation();deleteItem(\'type\', \''+selectedCategory+'\', \''+t.replace(/'/g,"\\'")+'\')" title="Delete"><i class="fas fa-trash"></i></button>';
+    h+='</div>';
+  });
+  $('#typeList').html(h);
+}
+
+function selectType(type){
+  selectedType=type;selectedBrand='';selectedModel='';
+  renderTypes();renderBrands();
+  $('#modelList').html('<p class="empty-msg">← Select a brand</p>');
+  $('#seriesList').html('<p class="empty-msg">← Select a model</p>');
+  $('#brandPanelTitle').text('('+type+')');
+  $('#modelPanelTitle,#seriesPanelTitle').text('');
+  $('#addBrandBtn').show();
+}
+
+function renderBrands(){
+  var c=hierarchyData[selectedCategory];if(!c||!c.brands)return;
+  var hasTypes=c.types&&c.types.length>0;
+  if(hasTypes&&!selectedType){
+    $('#brandList').html('<p class="empty-msg">← Select a type to view brands</p>');
+    return;
+  }
+  var h='';var brands=c.brands;
+  for(var b in brands){
+    if(!brands.hasOwnProperty(b))continue;
+    var bd=brands[b];
+    if(selectedType&&bd.types!==undefined&&bd.types.indexOf(selectedType)===-1)continue;
+    var mc=bd.models?Object.keys(bd.models).length:0;
+    var a=b===selectedBrand?' active':'';
+    h+='<div class="hierarchy-item'+a+'" onclick="selectBrand(\''+b.replace(/'/g,"\\'")+'\')">';
+    h+='<span>'+b+'</span><span class="item-count">'+mc+'</span>';
+    h+='<button class="item-view" onclick="event.stopPropagation();window.location.href=\'/admin/products?category='+selectedCategory+'&brand='+b.replace(/'/g,"\\'")+'\'" title="View Products"><i class="fas fa-box"></i></button>';
+    h+='<button class="item-delete" onclick="event.stopPropagation();deleteItem(\'brand\', \''+selectedCategory+'\', \''+b.replace(/'/g,"\\'")+'\')" title="Delete"><i class="fas fa-trash"></i></button>';
+    h+='</div>';
+  }
+  $('#brandList').html(h||'<p class="empty-msg">No brands for this filter</p>');
+}
+
+function selectBrand(name){
+  selectedBrand=name;selectedModel='';
+  renderBrands();renderModels();
+  $('#seriesList').html('<p class="empty-msg">← Select a model</p>');
+  $('#modelPanelTitle').text('('+name+')');
+  $('#seriesPanelTitle').text('');
+  $('#addModelBtn').show();
+}
+
+function renderModels(){
+  var c=hierarchyData[selectedCategory];if(!c||!c.brands||!c.brands[selectedBrand])return;
+  var models=c.brands[selectedBrand].models||{};var h='';
+  for(var m in models){
+    if(!models.hasOwnProperty(m))continue;
+    var md=models[m];var sc=md.series?md.series.length:0;
+    var a=m===selectedModel?' active':'';
+    h+='<div class="hierarchy-item'+a+'" onclick="selectModel(\''+m.replace(/'/g,"\\'")+'\')">';
+    h+='<span>'+m+'</span><span class="item-count">'+sc+'</span>';
+    h+='<button class="item-view" onclick="event.stopPropagation();window.location.href=\'/admin/products?category='+selectedCategory+'&brand='+selectedBrand.replace(/'/g,"\\'")+'&model='+m.replace(/'/g,"\\'")+'\'" title="View Products"><i class="fas fa-box"></i></button>';
+    h+='<button class="item-delete" onclick="event.stopPropagation();deleteItem(\'model\', \''+selectedCategory+'\', \''+selectedBrand.replace(/'/g,"\\'")+'\', \''+m.replace(/'/g,"\\'")+'\')" title="Delete"><i class="fas fa-trash"></i></button>';
+    h+='</div>';
+  }
+  $('#modelList').html(h||'<p class="empty-msg">No models</p>');
+}
+
+function selectModel(name){
+  selectedModel=name;renderModels();renderSeries();
+  $('#seriesPanelTitle').text('('+name+')');
+  $('#addSeriesBtn').show();
+}
+
+function renderSeries(){
+  var c=hierarchyData[selectedCategory];
+  if(!c||!c.brands||!c.brands[selectedBrand]||!c.brands[selectedBrand].models[selectedModel])return;
+  var series=c.brands[selectedBrand].models[selectedModel].series||[];var h='';
+  series.forEach(function(s){
+    h+='<div class="hierarchy-item"><span>'+s+'</span>';
+    h+='<button class="item-view" onclick="event.stopPropagation();window.location.href=\'/admin/products?category='+selectedCategory+'&brand='+selectedBrand.replace(/'/g,"\\'")+'&model='+selectedModel.replace(/'/g,"\\'")+'&series='+s.replace(/'/g,"\\'")+'\'" title="View Products"><i class="fas fa-box"></i></button>';
+    h+='<button class="item-delete" onclick="event.stopPropagation();deleteItem(\'series\', \''+selectedCategory+'\', \''+selectedBrand.replace(/'/g,"\\'")+'\', \''+selectedModel.replace(/'/g,"\\'")+'\', \''+s.replace(/'/g,"\\'")+'\')" title="Delete"><i class="fas fa-trash"></i></button>';
+    h+='</div>';
+  });
+  $('#seriesList').html(h||'<p class="empty-msg">No series defined</p>');
+}
+
+function openAddModal(mode){
+  if(mode==='type'&&!selectedCategory){showToast('Select a category first','error');return}
+  if(mode==='brand'&&!selectedCategory){showToast('Select a category first','error');return}
+  if(mode==='model'&&!selectedBrand){showToast('Select a brand first','error');return}
+  if(mode==='series'&&!selectedModel){showToast('Select a model first','error');return}
+  addMode=mode;
+  var t={category:'Add Category',type:'Add Type',brand:'Add Brand',model:'Add Model Line',series:'Add Series/Variant'};
+  var p={category:'e.g., Cameras',type:'e.g., Gaming, Business, Ultrabook',brand:'e.g., Canon, Sony',model:'e.g., EliteBook, ROG, Galaxy S',series:'e.g., EliteBook 840 G10, ROG Strix G18'};
+  $('#addItemTitle').text(t[mode]||'Add');
+  $('#addItemLabel').text(t[mode]||'Name');
+  $('#addItemName').val('').attr('placeholder',p[mode]||'Enter name');
+  $('#addItemModal').addClass('active');$('body').css('overflow','hidden');
+  setTimeout(function(){$('#addItemName').focus()},100);
+}
+
+function closeAddModal(){$('#addItemModal').removeClass('active');$('body').css('overflow','')}
+
+function saveNewItem(){
+  var name=$('#addItemName').val().trim();
+  if(!name){showToast('Please enter a name','error');return}
+  var payload={mode:addMode,name:name,category:selectedCategory,type:selectedType,brand:selectedBrand,model:selectedModel};
+  $.ajax({url:'/admin/api/hierarchy/add',method:'POST',data:JSON.stringify(payload),contentType:'application/json'})
+  .done(function(d){
+    if(d.success){showToast(name+' added!','success');closeAddModal();loadHierarchy()}
+    else{showToast(d.message||'Error','error')}
+  }).fail(function(){showToast('Error adding item','error')});
+}
+
+var deletePayload=null;
+
+function deleteItem(){
+  var args=arguments;
+  var mode=args[0];
+  var payload={mode:mode};
+  if(mode==='category'){
+    payload.category=args[1];
+    payload.name=args[1];
+  }else if(mode==='type'){
+    payload.category=args[1];
+    payload.name=args[2];
+  }else if(mode==='brand'){
+    payload.category=args[1];
+    payload.name=args[2];
+  }else if(mode==='model'){
+    payload.category=args[1];
+    payload.brand=args[2];
+    payload.name=args[3];
+  }else if(mode==='series'){
+    payload.category=args[1];
+    payload.brand=args[2];
+    payload.model=args[3];
+    payload.name=args[4];
+  }
+  deletePayload=payload;
+  $('#deleteItemName').text(payload.name||'');
+  $('#deleteConfirmModal').addClass('active');
+  $('body').css('overflow','hidden');
+}
+
+function closeDeleteModal(){
+  $('#deleteConfirmModal').removeClass('active');
+  $('body').css('overflow','');
+  deletePayload=null;
+}
+
+function confirmDeleteItem(){
+  if(!deletePayload)return;
+  $.ajax({
+    url:'/admin/api/hierarchy/delete',
+    method:'POST',
+    data:JSON.stringify(deletePayload),
+    contentType:'application/json'
+  }).done(function(d){
+    if(d.success){
+      showToast('Item deleted successfully','success');
+      closeDeleteModal();
+      loadHierarchy();
+    }else{
+      showToast(d.message||'Error deleting item','error');
+    }
+  }).fail(function(){
+    showToast('Error deleting item','error');
+  });
+}
+</script>

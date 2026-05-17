@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login | SegzTech</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  
+  <style>
+    :root {
+      --primary: #ff6a00;
+      --primary-dark: #e55e00;
+      --secondary: #2d3436;
+      --text-primary: #2d3436;
+      --text-secondary: #636e72;
+      --text-muted: #b2bec3;
+      --bg-primary: #ffffff;
+      --bg-secondary: #f5f6fa;
+      --bg-dark: #1e272e;
+      --border: #e1e8ed;
+      --radius: 8px;
+      --radius-lg: 12px;
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+      --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12);
+      --font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg-dark);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .login-container {
+      width: 100%;
+      max-width: 440px;
+    }
+
+    .login-card {
+      background: var(--bg-primary);
+      border-radius: var(--radius-lg);
+      padding: 48px 40px;
+      box-shadow: var(--shadow-md);
+    }
+
+    .login-header {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+
+    .login-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--text-primary);
+      text-decoration: none;
+      margin-bottom: 12px;
+    }
+
+    .login-logo .logo-icon {
+      font-size: 36px;
+      color: var(--primary);
+    }
+
+    .login-logo .logo-text span {
+      color: var(--primary);
+    }
+
+    .login-header h1 {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .login-header p {
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .form-group label {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    .input-wrapper i {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 16px;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 14px 16px 14px 48px;
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 15px;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      background: var(--bg-secondary);
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: var(--bg-primary);
+      box-shadow: 0 0 0 4px rgba(255, 106, 0, 0.1);
+    }
+
+    .form-control::placeholder {
+      color: var(--text-muted);
+    }
+
+    .remember-forgot {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      color: var(--text-secondary);
+    }
+
+    .checkbox-label input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--primary);
+    }
+
+    .forgot-link {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .forgot-link:hover {
+      text-decoration: underline;
+    }
+
+    .btn-login {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, var(--primary) 0%, #ff8c00 100%);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .btn-login:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(255, 106, 0, 0.4);
+    }
+
+    .btn-login:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .error-message {
+      background: rgba(231, 76, 60, 0.1);
+      color: var(--danger);
+      padding: 14px 16px;
+      border-radius: var(--radius);
+      font-size: 14px;
+      display: none;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid rgba(231, 76, 60, 0.2);
+    }
+
+    .error-message.show {
+      display: flex;
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin: 8px 0;
+    }
+
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .divider span {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .back-link {
+      text-align: center;
+      margin-top: 24px;
+    }
+
+    .back-link a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .back-link a:hover {
+      color: var(--primary);
+    }
+
+    .admin-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--bg-secondary);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+    }
+
+    .admin-badge i {
+      color: var(--primary);
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-card">
+      <div class="login-header">
+        <a href="/admin" class="login-logo">
+          <img src="/images/segztech.png" alt="SegzTech" style="height:40px;width:auto">
+        </a>
+        <div class="admin-badge">
+          <i class="fas fa-shield-alt"></i>
+          Admin Portal
+        </div>
+        <h1>Welcome Back</h1>
+        <p>Sign in to manage your store</p>
+      </div>
+
+      <% if (error) { %>
+        <div class="error-message show">
+          <i class="fas fa-exclamation-circle"></i>
+          <%= error %>
+        </div>
+      <% } %>
+
+      <form action="/admin/login" method="POST" class="login-form">
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <div class="input-wrapper">
+            <i class="fas fa-envelope"></i>
+            <input type="email" id="email" name="email" class="form-control" placeholder="admin@segztech.com" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <div class="input-wrapper">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="password" name="password" class="form-control" placeholder="Enter your password" required>
+          </div>
+        </div>
+
+        <div class="remember-forgot">
+          <label class="checkbox-label">
+            <input type="checkbox" name="remember">
+            Remember me
+          </label>
+        </div>
+
+        <button type="submit" class="btn-login">
+          <i class="fas fa-sign-in-alt"></i>
+          Sign In
+        </button>
+      </form>
+
+      <div class="back-link">
+        <a href="/">
+          <i class="fas fa-arrow-left"></i>
+          Back to Store
+        </a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,133 @@
+<%- include('../../partials/header') %>
+
+<main class="main-content">
+  <section class="order-detail-page">
+    <div class="container">
+      <% if (success) { %>
+      <div class="alert alert-success" style="margin-bottom: 20px; padding: 16px; background: #d4edda; border: 1px solid #c3e6cb; border-radius: 8px; color: #155724;">
+        <i class="fas fa-check-circle"></i> Your order has been placed successfully! Order #<%= order.orderNumber %>
+      </div>
+      <% } %>
+      
+      <!-- Breadcrumb -->
+      <nav class="breadcrumb-simple">
+        <a href="/orders">My Orders</a>
+        <span>/</span>
+        <span>Order #<%= order.orderNumber %></span>
+      </nav>
+      
+      <div class="order-detail-header">
+        <div>
+          <h1>Order #<%= order.orderNumber %></h1>
+          <p class="order-date">Placed on <%= new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></p>
+        </div>
+        <span class="order-status status-<%= order.status %>"><%= order.status.charAt(0).toUpperCase() + order.status.slice(1) %></span>
+      </div>
+      
+      <div class="order-detail-grid">
+        <!-- Order Items -->
+        <div class="order-items-section">
+          <h2>Order Items</h2>
+          <div class="order-items-list">
+            <% order.items.forEach(item => { %>
+              <div class="order-item-row">
+                <img src="<%= item.image %>" alt="<%= item.name %>">
+                <div class="item-info">
+                  <a href="/products/<%= item.product_id %>" class="item-name"><%= item.name %></a>
+                  <span class="item-price">₦<%= item.price.toFixed(2) %> x <%= item.quantity %></span>
+                </div>
+                <span class="item-subtotal">₦<%= item.subtotal.toFixed(2) %></span>
+              </div>
+            <% }) %>
+          </div>
+          
+          <!-- Order Timeline -->
+          <div class="order-timeline">
+            <h2>Order Timeline</h2>
+            <div class="timeline">
+              <% (order.timeline || []).forEach((event, index) => { %>
+                <div class="timeline-item <%= index === (order.timeline || []).length - 1 ? 'active' : '' %>">
+                  <div class="timeline-dot"></div>
+                  <div class="timeline-content">
+                    <strong><%= event.status.charAt(0).toUpperCase() + event.status.slice(1) %></strong>
+                    <p><%= event.note %></p>
+                    <span class="timeline-date"><%= new Date(event.createdAt).toLocaleString() %></span>
+                  </div>
+                </div>
+              <% }) %>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Order Summary -->
+        <div class="order-summary-section">
+          <!-- Summary -->
+          <div class="summary-card">
+            <h3>Order Summary</h3>
+            <div class="summary-row">
+              <span>Subtotal</span>
+              <span>₦<%= order.subtotal.toFixed(2) %></span>
+            </div>
+            <div class="summary-row">
+              <span>Shipping (<%= order.shippingLabel %>)</span>
+              <span><%= order.shippingCost === 0 ? 'FREE' : '₦' + order.shippingCost.toFixed(2) %></span>
+            </div>
+            <div class="summary-row">
+              <span>Tax</span>
+              <span>₦<%= order.tax.toFixed(2) %></span>
+            </div>
+            <div class="summary-total">
+              <span>Total</span>
+              <span>₦<%= order.total.toFixed(2) %></span>
+            </div>
+          </div>
+          
+          <!-- Shipping Address -->
+          <div class="info-card">
+            <h3>Shipping Address</h3>
+            <p><strong><%= order.shippingAddress.fullName %></strong></p>
+            <p><%= order.shippingAddress.street %></p>
+            <p><%= order.shippingAddress.city %>, <%= order.shippingAddress.state %> <%= order.shippingAddress.zipCode %></p>
+            <p><%= order.shippingAddress.country %></p>
+            <p><i class="fas fa-phone"></i> <%= order.shippingAddress.phone %></p>
+          </div>
+          
+          <!-- Payment Info -->
+          <div class="info-card">
+            <h3>Payment Information</h3>
+            <p><strong>Method:</strong> <%= order.paymentMethod %></p>
+            <p><strong>Status:</strong> <span class="payment-status <%= order.paymentStatus %>"><%= order.paymentStatus.charAt(0).toUpperCase() + order.paymentStatus.slice(1) %></span></p>
+          </div>
+          
+          <!-- Tracking Info -->
+          <% if (order.trackingNumber) { %>
+            <div class="info-card">
+              <h3>Tracking Information</h3>
+              <p><strong>Tracking Number:</strong> <%= order.trackingNumber %></p>
+              <% if (order.estimatedDelivery) { %>
+                <p><strong>Estimated Delivery:</strong> <%= new Date(order.estimatedDelivery).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) %></p>
+              <% } %>
+              <a href="/orders/track/<%= order.orderNumber %>" class="btn btn-outline btn-block">Track Order</a>
+            </div>
+          <% } %>
+          
+          <!-- Actions -->
+          <div class="order-actions-section">
+            <% if (['pending', 'processing'].includes(order.status)) { %>
+              <form action="/orders/<%= order.id %>/cancel" method="POST" onsubmit="return confirm('Are you sure you want to cancel this order?')">
+                <button type="submit" class="btn btn-danger btn-block">
+                  <i class="fas fa-times"></i> Cancel Order
+                </button>
+              </form>
+            <% } %>
+            <a href="/orders" class="btn btn-outline btn-block">
+              <i class="fas fa-arrow-left"></i> Back to Orders
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<%- include('../../partials/footer') %>
