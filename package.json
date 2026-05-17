@@ -7,7 +7,9 @@
     "start": "node app.js",
     "dev": "node --watch app.js",
     "seed": "node src/database/seed.js",
-    "migrate": "node src/database/migrate.js"
+    "migrate": "node src/database/migrate.js",
+    "teardown": "node src/database/teardown.js",
+    "reset": "npm run teardown && npm run migrate && npm run seed"
   },
   "keywords": [
     "ecommerce",

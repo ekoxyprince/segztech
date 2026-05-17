@@ -573,6 +573,39 @@ CREATE TABLE IF NOT EXISTS site_settings (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =============================================================
+-- DROP ALL TABLES (run this section first to reset)
+-- =============================================================
+
+SET FOREIGN_KEY_CHECKS = 0;
+
+DROP TABLE IF EXISTS recommendation_cache;
+DROP TABLE IF EXISTS region_analytics;
+DROP TABLE IF EXISTS search_analytics;
+DROP TABLE IF EXISTS product_analytics;
+DROP TABLE IF EXISTS user_activities;
+DROP TABLE IF EXISTS user_sessions;
+DROP TABLE IF EXISTS reviews;
+DROP TABLE IF EXISTS wishlists;
+DROP TABLE IF EXISTS cart_items;
+DROP TABLE IF EXISTS order_timeline;
+DROP TABLE IF EXISTS order_addresses;
+DROP TABLE IF EXISTS order_items;
+DROP TABLE IF EXISTS orders;
+DROP TABLE IF EXISTS flash_sale_banners;
+DROP TABLE IF EXISTS product_videos;
+DROP TABLE IF EXISTS product_images;
+DROP TABLE IF EXISTS products;
+DROP TABLE IF EXISTS brands;
+DROP TABLE IF EXISTS categories;
+DROP TABLE IF EXISTS user_addresses;
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS notifications;
+DROP TABLE IF EXISTS contact_messages;
+DROP TABLE IF EXISTS site_settings;
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+-- =============================================================
 -- SEED DATA
 -- =============================================================
 
