@@ -69,10 +69,13 @@ CREATE TABLE IF NOT EXISTS brands (
     id VARCHAR(36) PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     slug VARCHAR(100) UNIQUE NOT NULL,
-    logo VARCHAR(255),
+    logo VARCHAR(500),
+    description TEXT,
+    is_active BOOLEAN DEFAULT TRUE,
     website VARCHAR(255),
     categories JSON,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_slug (slug)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
